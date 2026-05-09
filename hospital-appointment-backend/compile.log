@@ -1,0 +1,73 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< com.nbucs:study-room-backend >--------------------
+[INFO] Building study-room-backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.2.0:resources (default-resources) @ study-room-backend ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Using 'UTF-8' encoding to copy filtered properties files.
+[INFO] Copying 1 resource
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- compiler:3.10.1:compile (default-compile) @ study-room-backend ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 103 source files to D:\me\SoftwareDesign\code\study-room-backend\target\classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /D:/me/SoftwareDesign/code/study-room-backend/src/main/java/com/nbucs/studyroombackend/config/SecurityConfig.java:[21,50] 找不到符号
+  符号:   方法 of(java.lang.String)
+  位置: 接口 java.util.List
+[ERROR] /D:/me/SoftwareDesign/code/study-room-backend/src/main/java/com/nbucs/studyroombackend/config/SecurityConfig.java:[22,50] 找不到符号
+  符号:   方法 of(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+  位置: 接口 java.util.List
+[ERROR] /D:/me/SoftwareDesign/code/study-room-backend/src/main/java/com/nbucs/studyroombackend/config/SecurityConfig.java:[23,50] 找不到符号
+  符号:   方法 of(java.lang.String)
+  位置: 接口 java.util.List
+[ERROR] /D:/me/SoftwareDesign/code/study-room-backend/src/main/java/com/nbucs/studyroombackend/config/SecurityConfig.java:[31,25] 无法将类 org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry<C>中的方法 requestMatchers应用到给定类型;
+  需要: org.springframework.security.web.util.matcher.RequestMatcher[]
+  找到: org.springframework.http.HttpMethod,java.lang.String
+  原因: varargs 不匹配; org.springframework.http.HttpMethod无法转换为org.springframework.security.web.util.matcher.RequestMatcher
+[ERROR] /D:/me/SoftwareDesign/code/study-room-backend/src/main/java/com/nbucs/studyroombackend/controller/ReservationController.java:[59,55] 找不到符号
+  符号:   方法 of(java.lang.String,int,java.lang.String,java.lang.Integer,java.lang.String,java.lang.String)
+  位置: 接口 java.util.Map
+[ERROR] /D:/me/SoftwareDesign/code/study-room-backend/src/main/java/com/nbucs/studyroombackend/service/impl/ViolationServiceImpl.java:[411,17] 找不到符号
+  符号:   方法 toList()
+  位置: 接口 java.util.stream.Stream<java.lang.String>
+[INFO] 6 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  7.201 s
+[INFO] Finished at: 2026-05-09T10:52:13+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.10.1:compile (default-compile) on project study-room-backend: Compilation failure: Compilation failure: 
+[ERROR] /D:/me/SoftwareDesign/code/study-room-backend/src/main/java/com/nbucs/studyroombackend/config/SecurityConfig.java:[21,50] 找不到符号
+[ERROR]   符号:   方法 of(java.lang.String)
+[ERROR]   位置: 接口 java.util.List
+[ERROR] /D:/me/SoftwareDesign/code/study-room-backend/src/main/java/com/nbucs/studyroombackend/config/SecurityConfig.java:[22,50] 找不到符号
+[ERROR]   符号:   方法 of(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+[ERROR]   位置: 接口 java.util.List
+[ERROR] /D:/me/SoftwareDesign/code/study-room-backend/src/main/java/com/nbucs/studyroombackend/config/SecurityConfig.java:[23,50] 找不到符号
+[ERROR]   符号:   方法 of(java.lang.String)
+[ERROR]   位置: 接口 java.util.List
+[ERROR] /D:/me/SoftwareDesign/code/study-room-backend/src/main/java/com/nbucs/studyroombackend/config/SecurityConfig.java:[31,25] 无法将类 org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry<C>中的方法 requestMatchers应用到给定类型;
+[ERROR]   需要: org.springframework.security.web.util.matcher.RequestMatcher[]
+[ERROR]   找到: org.springframework.http.HttpMethod,java.lang.String
+[ERROR]   原因: varargs 不匹配; org.springframework.http.HttpMethod无法转换为org.springframework.security.web.util.matcher.RequestMatcher
+[ERROR] /D:/me/SoftwareDesign/code/study-room-backend/src/main/java/com/nbucs/studyroombackend/controller/ReservationController.java:[59,55] 找不到符号
+[ERROR]   符号:   方法 of(java.lang.String,int,java.lang.String,java.lang.Integer,java.lang.String,java.lang.String)
+[ERROR]   位置: 接口 java.util.Map
+[ERROR] /D:/me/SoftwareDesign/code/study-room-backend/src/main/java/com/nbucs/studyroombackend/service/impl/ViolationServiceImpl.java:[411,17] 找不到符号
+[ERROR]   符号:   方法 toList()
+[ERROR]   位置: 接口 java.util.stream.Stream<java.lang.String>
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

@@ -1,0 +1,208 @@
+<template>
+  <div class="login-page">
+    <div class="login-box">
+      <div class="login-header">
+        <h1>医院预约挂号系统</h1>
+        <p>便捷就医，从预约开始</p>
+      </div>
+      
+      <div class="login-tabs">
+        <el-radio-group v-model="loginType">
+          <el-radio-button label="patient">患者登录</el-radio-button>
+          <el-radio-button label="doctor">医生登录</el-radio-button>
+          <el-radio-button label="admin">管理员登录</el-radio-button>
+        </el-radio-group>
+      </div>
+
+      <el-form :model="loginForm" :rules="rules" ref="formRef">
+        <el-form-item prop="phone">
+          <el-input 
+            v-model="loginForm.phone" 
+            :placeholder="loginType === 'admin' ? '请输入管理员账号' : '请输入手机号'"
+            size="large"
+            prefix-icon="Phone"
+          />
+        </el-form-item>
+        
+        <el-form-item prop="password">
+          <el-input 
+            v-model="loginForm.password" 
+            type="password" 
+            placeholder="请输入密码"
+            size="large"
+            prefix-icon="Lock"
+            show-password
+          />
+        </el-form-item>
+
+        <div class="form-footer">
+          <el-checkbox v-model="rememberMe">记住我</el-checkbox>
+        </div>
+
+        <el-form-item>
+          <el-button type="primary" size="large" :loading="loading" @click="handleLogin" class="login-btn">
+            登 录
+          </el-button>
+        </el-form-item>
+      </el-form>
+
+      <div v-if="loginType === 'patient'" class="register-link">
+        <span>还没有账号？</span>
+        <el-link type="primary" @click="goToRegister">立即注册</el-link>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { patientAPI } from '@/api/hospital/patient'
+
+const router = useRouter()
+const formRef = ref()
+const loading = ref(false)
+const loginType = ref('patient')
+const rememberMe = ref(false)
+
+const loginForm = reactive({
+  phone: '',
+  password: ''
+})
+
+const rules = {
+  phone: [
+    { required: true, message: '请输入账号', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, message: '密码至少6位', trigger: 'blur' }
+  ]
+}
+
+const handleLogin = async () => {
+  try {
+    await formRef.value.validate()
+    loading.value = true
+    
+    let res: any
+
+    if (loginType.value === 'patient') {
+      res = await patientAPI.login(loginForm.phone, loginForm.password)
+      if (res.code === 200) {
+        ElMessage.success('登录成功')
+        localStorage.setItem('hospital_user', JSON.stringify({
+          type: 'patient',
+          ...res.data
+        }))
+        router.push('/hospital/home')
+        return
+      }
+    } else if (loginType.value === 'doctor') {
+      // 医生登录 - 通过 patient 接口模拟
+      res = await patientAPI.login(loginForm.phone, loginForm.password)
+      if (res.code === 200) {
+        ElMessage.success('医生登录成功')
+        localStorage.setItem('hospital_user', JSON.stringify({
+          type: 'doctor',
+          ...res.data
+        }))
+        router.push('/hospital/home')
+        return
+      }
+    } else if (loginType.value === 'admin') {
+      res = await patientAPI.login(loginForm.phone, loginForm.password)
+      if (res.code === 200) {
+        ElMessage.success('管理员登录成功')
+        localStorage.setItem('hospital_user', JSON.stringify({
+          type: 'admin',
+          ...res.data
+        }))
+        router.push('/hospital/home')
+        return
+      }
+    }
+    
+    ElMessage.error(res?.message || '登录失败，请检查账号密码')
+  } catch (error) {
+    console.error('登录出错:', error)
+    ElMessage.error('登录失败，请检查网络连接')
+  } finally {
+    loading.value = false
+  }
+}
+
+const goToRegister = () => {
+  router.push('/hospital/register')
+}
+</script>
+
+<style scoped>
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-box {
+  width: 400px;
+  padding: 40px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-header h1 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.login-header p {
+  color: #999;
+  font-size: 14px;
+}
+
+.login-tabs {
+  margin-bottom: 30px;
+}
+
+.login-tabs .el-radio-group {
+  width: 100%;
+  display: flex;
+}
+
+.login-tabs .el-radio-button {
+  flex: 1;
+}
+
+.login-tabs .el-radio-button__inner {
+  width: 100%;
+}
+
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.login-btn {
+  width: 100%;
+}
+
+.register-link {
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+  margin-top: 15px;
+}
+</style>

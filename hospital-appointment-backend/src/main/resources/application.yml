@@ -1,0 +1,17 @@
+server:
+  port: 3000
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/hospital_appointment?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: 5124&96414xss
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: never
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+jwt:
+  secret: 0QyIfFneqZvORpvsP1659fzv9Jq6y15ckYx4Ei4uXI/pj58dbmMJ3M2upJepbBaHQwzOU641eWiHDpXVPcSnCA==
+  expiration: 86400000
