@@ -1,0 +1,31 @@
+# Java
+target/
+*.class
+*.log
+
+# Maven
+.mvn/
+
+# IDEA
+.idea/
+*.iml
+
+# Node
+node_modules/
+dist/
+
+# Env
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vue
+coverage/
+
+# Build
+build/
+
+# VSCode
+.vscode/
