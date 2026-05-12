@@ -21,8 +21,14 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="router.push('/hospital/my-appointments')">
+                <el-dropdown-item v-if="userType === 'patient'" @click="router.push('/hospital/my-appointments')">
                   我的挂号
+                </el-dropdown-item>
+                <el-dropdown-item v-if="userType === 'doctor'" @click="router.push('/hospital/doctor/workbench')">
+                  医生工作台
+                </el-dropdown-item>
+                <el-dropdown-item v-if="userType === 'admin'" @click="router.push('/admin')">
+                  管理后台
                 </el-dropdown-item>
                 <el-dropdown-item divided @click="handleLogout">
                   退出登录
@@ -53,7 +59,7 @@
       </div>
 
       <!-- 科室分类导航 -->
-      <div class="department-types">
+      <div v-if="!isSearching" class="department-types">
         <div class="type-item" 
              v-for="type in departmentTypes" 
              :key="type.value"
@@ -64,7 +70,7 @@
       </div>
 
       <!-- 科室列表 -->
-      <div class="department-section">
+      <div v-if="!isSearching" class="department-section">
         <h2 class="section-title">全部科室</h2>
         <div class="department-grid">
           <div 
@@ -80,8 +86,39 @@
         </div>
       </div>
 
-      <!-- 推荐医生 -->
-      <div class="doctor-section">
+      <!-- 搜索结果 -->
+      <div v-if="isSearching" class="doctor-section">
+        <div class="section-header">
+          <h2 class="section-title">搜索结果</h2>
+          <el-button size="small" @click="clearSearch">返回全部</el-button>
+        </div>
+        <div v-if="searchResults.length > 0" class="doctor-grid">
+          <div 
+            v-for="doctor in searchResults" 
+            :key="doctor.doctorID"
+            class="doctor-card"
+            @click="router.push(`/hospital/schedule/${doctor.doctorID}`)"
+          >
+            <div class="doctor-avatar">
+              <el-avatar :size="60" style="background-color: #67c23a;">
+                {{ doctor.doctorName?.charAt(0) }}
+              </el-avatar>
+            </div>
+            <div class="doctor-info">
+              <div class="doctor-name">{{ doctor.doctorName }}</div>
+              <div class="doctor-title">{{ doctor.title }}</div>
+              <div class="doctor-dept">{{ doctor.departmentName }}</div>
+            </div>
+            <div class="doctor-action">
+              <el-button type="primary" size="small">预约挂号</el-button>
+            </div>
+          </div>
+        </div>
+        <el-empty v-else description="未找到相关医生，请尝试其他关键词" />
+      </div>
+
+      <!-- 推荐医生（仅在非搜索状态显示） -->
+      <div v-if="!isSearching" class="doctor-section">
         <h2 class="section-title">推荐专家</h2>
         <div class="doctor-grid">
           <div 
@@ -124,6 +161,8 @@ const router = useRouter()
 const searchKeyword = ref('')
 const departments = ref<Department[]>([])
 const recommendedDoctors = ref<Doctor[]>([])
+const searchResults = ref<Doctor[]>([])
+const isSearching = ref(false)
 const selectedType = ref<number | null>(null)
 
 // 登录状态
@@ -132,7 +171,15 @@ const currentUser = computed(() => {
   const data = localStorage.getItem('hospital_user')
   return data ? JSON.parse(data) : null
 })
-const userName = computed(() => currentUser.value?.patientName || '用户')
+const userType = computed(() => currentUser.value?.type || 'patient')
+const userName = computed(() => {
+  const user = currentUser.value
+  if (!user) return '用户'
+  if (user.type === 'patient') return user.patientName || '患者'
+  if (user.type === 'doctor') return user.doctorName || '医生'
+  if (user.type === 'admin') return user.adminName || '管理员'
+  return '用户'
+})
 
 const handleLogout = async () => {
   await ElMessageBox.confirm('确认退出登录？', '提示')
@@ -197,11 +244,18 @@ const handleSearch = async () => {
   try {
     const res = await doctorAPI.search(searchKeyword.value)
     if (res.code === 200) {
-      recommendedDoctors.value = res.data || []
+      searchResults.value = res.data || []
+      isSearching.value = true
     }
   } catch (error) {
     ElMessage.error('搜索失败')
   }
+}
+
+const clearSearch = () => {
+  searchKeyword.value = ''
+  searchResults.value = []
+  isSearching.value = false
 }
 
 const filterByType = (type: number) => {
@@ -331,6 +385,17 @@ onMounted(() => {
   font-size: 20px;
   margin-bottom: 20px;
   color: #333;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-header .section-title {
+  margin-bottom: 0;
 }
 
 .department-grid {

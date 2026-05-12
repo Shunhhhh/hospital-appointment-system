@@ -59,6 +59,8 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { patientAPI } from '@/api/hospital/patient'
+import { doctorAPI } from '@/api/hospital/doctor'
+import { adminAPI } from '@/api/hospital/admin'
 
 const router = useRouter()
 const formRef = ref()
@@ -100,19 +102,20 @@ const handleLogin = async () => {
         return
       }
     } else if (loginType.value === 'doctor') {
-      // 医生登录 - 通过 patient 接口模拟
-      res = await patientAPI.login(loginForm.phone, loginForm.password)
+      // 医生登录
+      res = await doctorAPI.login(loginForm.phone, loginForm.password)
       if (res.code === 200) {
         ElMessage.success('医生登录成功')
         localStorage.setItem('hospital_user', JSON.stringify({
           type: 'doctor',
           ...res.data
         }))
-        router.push('/hospital/home')
+        router.push('/hospital/doctor/workbench')
         return
       }
     } else if (loginType.value === 'admin') {
-      res = await patientAPI.login(loginForm.phone, loginForm.password)
+      // 管理员登录（使用 adminID）
+      res = await adminAPI.login(Number(loginForm.phone), loginForm.password)
       if (res.code === 200) {
         ElMessage.success('管理员登录成功')
         localStorage.setItem('hospital_user', JSON.stringify({

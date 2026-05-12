@@ -53,7 +53,7 @@ export const doctorAPI = {
    * 搜索医生
    */
   search: (keyword: string) => {
-    return request.get<Doctor[]>('/hospital/doctor/search', { keyword })
+    return request.get<Doctor[]>('/hospital/doctor/search', { params: { keyword } })
   },
 
   /**

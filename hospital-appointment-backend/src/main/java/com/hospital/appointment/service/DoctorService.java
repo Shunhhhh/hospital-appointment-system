@@ -3,6 +3,7 @@ package com.hospital.appointment.service;
 import com.hospital.appointment.entity.Doctor;
 import com.hospital.appointment.mapper.DoctorMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +16,8 @@ public class DoctorService {
     
     @Autowired
     private DoctorMapper doctorMapper;
+    
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     
     /**
      * 获取所有医生列表
@@ -52,10 +55,18 @@ public class DoctorService {
     }
     
     /**
-     * 医生登录
+     * 医生登录（BCrypt 密码验证）
      */
     public Doctor login(String phone, String password) {
-        return doctorMapper.login(phone, password);
+        Doctor doctor = doctorMapper.selectByPhone(phone);
+        if (doctor == null) {
+            return null;
+        }
+        // 使用 BCrypt 验证密码
+        if (passwordEncoder.matches(password, doctor.getDoctorPassword())) {
+            return doctor;
+        }
+        return null;
     }
     
     /**

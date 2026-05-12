@@ -125,9 +125,12 @@ const getStatusText = (status: number) => {
 }
 
 const loadDoctor = () => {
-  const doctorStr = localStorage.getItem('doctor')
-  if (doctorStr) {
-    doctor.value = JSON.parse(doctorStr)
+  const userStr = localStorage.getItem('hospital_user')
+  if (userStr) {
+    const user = JSON.parse(userStr)
+    if (user.type === 'doctor') {
+      doctor.value = user
+    }
   }
 }
 

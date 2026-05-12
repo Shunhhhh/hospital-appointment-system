@@ -65,6 +65,10 @@ public interface ScheduleMapper {
             "LEFT JOIN department dept ON d.departmentID = dept.departmentID " +
             "WHERE ds.scheduleID = #{id}")
     DoctorSchedule selectById(Long id);
+
+    @Select("SELECT ds.* FROM doctor_schedule ds " +
+            "WHERE ds.doctorID = #{doctorId} AND ds.scheduleDate = #{date} AND ds.scheduleStatus = 1")
+    List<DoctorSchedule> selectByDoctorAndDate(@Param("doctorId") Long doctorId, @Param("date") LocalDate date);
     
     @Insert("INSERT INTO doctor_schedule (doctorID, scheduleDate, timeSlot, startTime, endTime, " +
             "totalSlots, remainingSlots, registeredSlots, price, registrationType, scheduleStatus) " +

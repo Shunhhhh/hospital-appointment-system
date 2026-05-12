@@ -33,12 +33,14 @@ public interface DoctorMapper {
     
     @Select("SELECT d.*, dept.departmentName FROM doctor d " +
             "LEFT JOIN department dept ON d.departmentID = dept.departmentID " +
-            "WHERE (d.doctorName LIKE CONCAT('%', #{keyword}, '%') OR d.specialty LIKE CONCAT('%', #{keyword}, '%')) " +
+            "WHERE (d.doctorName LIKE CONCAT('%', #{keyword}, '%') " +
+            "OR d.specialty LIKE CONCAT('%', #{keyword}, '%') " +
+            "OR dept.departmentName LIKE CONCAT('%', #{keyword}, '%')) " +
             "AND d.doctorStatus = 1")
     List<Doctor> search(String keyword);
     
-    @Select("SELECT * FROM doctor WHERE doctorPhone = #{phone} AND doctorPassword = #{password} AND doctorStatus = 1")
-    Doctor login(@Param("phone") String phone, @Param("password") String password);
+    @Select("SELECT * FROM doctor WHERE doctorPhone = #{phone} AND doctorStatus = 1")
+    Doctor selectByPhone(@Param("phone") String phone);
     
     @Insert("INSERT INTO doctor (doctorName, doctorPassword, doctorGender, doctorPhone, doctorEmail, " +
             "departmentID, title, specialty, doctorIntro, doctorPhoto, registrationFee, doctorStatus) " +

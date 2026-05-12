@@ -136,6 +136,18 @@ public class ScheduleController {
     }
     
     /**
+     * 为所有医生生成默认排班（未来7天工作日，上下午各一个时段）
+     */
+    @PostMapping("/init")
+    public Result<String> initSchedules() {
+        boolean success = scheduleService.generateAllDefaultSchedules();
+        if (success) {
+            return Result.success("排班数据生成成功");
+        }
+        return Result.error("排班数据生成失败");
+    }
+    
+    /**
      * 预约号源减一
      */
     @PutMapping("/{id}/decrement")
@@ -144,7 +156,7 @@ public class ScheduleController {
         if (success) {
             return Result.success("号源预约成功");
         }
-        return Result.error("号源预约失败");
+        return Result.success("号源预约失败");
     }
     
     /**
