@@ -16,6 +16,7 @@ dist/
 
 # Env
 .env
+application.yml
 
 # OS
 .DS_Store

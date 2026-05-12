@@ -34,8 +34,8 @@ public interface ScheduleMapper {
             "LEFT JOIN doctor d ON ds.doctorID = d.doctorID " +
             "LEFT JOIN department dept ON d.departmentID = dept.departmentID " +
             "WHERE d.departmentID = #{departmentId} " +
-            "<if test='startDate != null'> AND ds.scheduleDate &gt;= #{startDate} </if>" +
-            "<if test='endDate != null'> AND ds.scheduleDate &lt;= #{endDate} </if>" +
+            "<if test='startDate != null'><![CDATA[ AND ds.scheduleDate >= #{startDate} ]]></if>" +
+            "<if test='endDate != null'><![CDATA[ AND ds.scheduleDate <= #{endDate} ]]></if>" +
             "ORDER BY ds.scheduleDate ASC, ds.timeSlot ASC" +
             "</script>")
     List<DoctorSchedule> selectByDepartment(@Param("departmentId") Long departmentId,
@@ -47,11 +47,11 @@ public interface ScheduleMapper {
             "FROM doctor_schedule ds " +
             "LEFT JOIN doctor d ON ds.doctorID = d.doctorID " +
             "LEFT JOIN department dept ON d.departmentID = dept.departmentID " +
-            "WHERE ds.scheduleStatus = 1 AND ds.remainingSlots &gt; 0 " +
+            "WHERE ds.scheduleStatus = 1 <![CDATA[ AND ds.remainingSlots > 0 ]]> " +
             "<if test='doctorId != null'> AND ds.doctorID = #{doctorId} </if>" +
             "<if test='departmentId != null'> AND d.departmentID = #{departmentId} </if>" +
-            "<if test='startDate != null'> AND ds.scheduleDate &gt;= #{startDate} </if>" +
-            "<if test='endDate != null'> AND ds.scheduleDate &lt;= #{endDate} </if>" +
+            "<if test='startDate != null'><![CDATA[ AND ds.scheduleDate >= #{startDate} ]]></if>" +
+            "<if test='endDate != null'><![CDATA[ AND ds.scheduleDate <= #{endDate} ]]></if>" +
             "ORDER BY ds.scheduleDate ASC, ds.timeSlot ASC" +
             "</script>")
     List<DoctorSchedule> selectAvailable(@Param("doctorId") Long doctorId,
@@ -85,10 +85,10 @@ public interface ScheduleMapper {
     int updateStatus(Long id, Integer status);
     
     @Update("UPDATE doctor_schedule SET remainingSlots = remainingSlots - 1, registeredSlots = registeredSlots + 1 " +
-            "WHERE scheduleID = #{id} AND remainingSlots &gt; 0")
+            "WHERE scheduleID = #{id} AND remainingSlots > 0")
     int decrementSlots(Long id);
     
     @Update("UPDATE doctor_schedule SET remainingSlots = remainingSlots + 1, registeredSlots = registeredSlots - 1 " +
-            "WHERE scheduleID = #{id} AND registeredSlots &gt; 0")
+            "WHERE scheduleID = #{id} AND registeredSlots > 0")
     int incrementSlots(Long id);
 }
