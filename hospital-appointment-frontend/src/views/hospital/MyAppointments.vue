@@ -1,7 +1,9 @@
 <template>
   <div class="my-appointments">
+    <BackHomeButton />
+
     <h1 class="page-title">我的挂号</h1>
-    
+
     <!-- 状态筛选 -->
     <div class="status-tabs">
       <el-radio-group v-model="statusFilter" @change="handleFilter">
@@ -10,13 +12,14 @@
         <el-radio-button label="2">已签到</el-radio-button>
         <el-radio-button label="4">已完成</el-radio-button>
         <el-radio-button label="5">已取消</el-radio-button>
+        <el-radio-button label="8">已失效</el-radio-button>
       </el-radio-group>
     </div>
 
     <!-- 挂号列表 -->
     <div class="appointment-list" v-loading="loading">
-      <div 
-        v-for="apt in appointments" 
+      <div
+        v-for="apt in appointments"
         :key="apt.appointmentID"
         class="appointment-card"
       >
@@ -34,7 +37,7 @@
             {{ getStatusText(apt.appointmentStatus) }}
           </el-tag>
         </div>
-        
+
         <div class="card-body">
           <div class="info-item">
             <el-icon><Calendar /></el-icon>
@@ -46,14 +49,24 @@
           </div>
         </div>
 
-        <div class="card-footer" v-if="apt.appointmentStatus === 1">
+        <div class="card-footer" v-if="apt.appointmentStatus === 1 && !isCheckInExpired(apt)">
           <el-button size="small" @click="handleCancel(apt.appointmentID)">取消预约</el-button>
           <el-button type="primary" size="small" @click="handleCheckIn(apt.appointmentID)">签到</el-button>
         </div>
-        
+
+        <div class="card-footer" v-if="apt.appointmentStatus === 1 && isCheckInExpired(apt)">
+          <el-button type="warning" size="small" disabled>签到已截止</el-button>
+          <span class="waiting-hint">超过预约开始 5 分钟未签到会自动失效</span>
+        </div>
+
         <div class="card-footer" v-if="apt.appointmentStatus === 2">
           <el-button type="success" size="small" disabled>已签到</el-button>
           <span class="waiting-hint">请等待叫号</span>
+        </div>
+
+        <div class="card-footer" v-if="apt.appointmentStatus === 8">
+          <el-button type="info" size="small" disabled>已失效</el-button>
+          <span class="waiting-hint">请重新预约其他时段</span>
         </div>
 
         <div class="card-footer" v-if="apt.appointmentStatus === 4 && apt.isReviewed === 0">
@@ -73,6 +86,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import BackHomeButton from '@/components/hospital/BackHomeButton.vue'
 import { appointmentAPI } from '@/api/hospital/appointment'
 import type { Appointment } from '@/api/hospital/appointment'
 
@@ -83,16 +97,39 @@ const statusFilter = ref('')
 
 const getStatusType = (status: number) => {
   const types: Record<number, string> = {
-    0: 'info', 1: 'primary', 2: 'warning', 3: 'warning', 4: 'success', 5: 'info', 6: 'info', 7: 'danger'
+    0: 'info', 1: 'primary', 2: 'warning', 3: 'warning', 4: 'success', 5: 'info', 6: 'info', 7: 'danger', 8: 'danger'
   }
   return types[status] || 'info'
 }
 
 const getStatusText = (status: number) => {
   const texts: Record<number, string> = {
-    0: '待支付', 1: '已预约', 2: '已签到', 3: '就诊中', 4: '已完成', 5: '已取消', 6: '已退号', 7: '已爽约'
+    0: '待支付', 1: '已预约', 2: '已签到', 3: '就诊中', 4: '已完成', 5: '已取消', 6: '已退号', 7: '已爽约', 8: '已失效'
   }
   return texts[status] || '未知'
+}
+
+const getAppointmentStartTime = (apt: Appointment) => {
+  if (apt.scheduleStartTime) {
+    return apt.scheduleStartTime
+  }
+  const fallbackTimes: Record<number, string> = {
+    1: '08:00:00',
+    2: '14:00:00',
+    3: '19:00:00'
+  }
+  return fallbackTimes[apt.timeSlot] || '08:00:00'
+}
+
+const isCheckInExpired = (apt: Appointment) => {
+  if (apt.appointmentStatus !== 1) {
+    return false
+  }
+
+  const [year, month, day] = apt.appointmentDate.split('-').map(Number)
+  const [hour, minute, second] = getAppointmentStartTime(apt).split(':').map(Number)
+  const startTime = new Date(year, month - 1, day, hour, minute, second || 0)
+  return Date.now() > startTime.getTime() + 5 * 60 * 1000
 }
 
 const loadAppointments = async () => {
@@ -127,6 +164,8 @@ const handleCancel = async (id: string) => {
     if (res.code === 200) {
       ElMessage.success('取消成功')
       loadAppointments()
+    } else {
+      ElMessage.error(res.message || '取消失败')
     }
   } catch (error: any) {
     if (error !== 'cancel') {
@@ -141,6 +180,8 @@ const handleCheckIn = async (id: string) => {
     if (res.code === 200) {
       ElMessage.success('签到成功')
       loadAppointments()
+    } else {
+      ElMessage.error(res.message || '签到失败')
     }
   } catch (error) {
     ElMessage.error('签到失败')

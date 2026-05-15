@@ -7,7 +7,7 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
--- CREATE DATABASE hospital_appointment;
+CREATE DATABASE hospital_appointment;
 USE hospital_appointment;
 
 -- =============================================

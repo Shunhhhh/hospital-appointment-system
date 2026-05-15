@@ -1,5 +1,7 @@
 <template>
   <div class="doctor-list">
+    <BackHomeButton />
+
     <!-- 筛选区域 -->
     <div class="filter-section">
       <el-select v-model="selectedTitle" placeholder="选择职称" clearable @change="handleFilter">
@@ -12,8 +14,8 @@
 
     <!-- 医生列表 -->
     <div class="doctor-grid" v-loading="loading">
-      <div 
-        v-for="doctor in filteredDoctors" 
+      <div
+        v-for="doctor in filteredDoctors"
         :key="doctor.doctorID"
         class="doctor-card"
         @click="goToDetail(doctor.doctorID)"
@@ -68,6 +70,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import BackHomeButton from '@/components/hospital/BackHomeButton.vue'
 import { doctorAPI } from '@/api/hospital/doctor'
 import type { Doctor } from '@/api/hospital/doctor'
 

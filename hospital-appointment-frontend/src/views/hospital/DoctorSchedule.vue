@@ -1,7 +1,9 @@
 <template>
   <div class="appointment-page">
+    <BackHomeButton />
+
     <h1 class="page-title">选择预约时间</h1>
-    
+
     <!-- 医生信息卡片 -->
     <div class="doctor-card" v-if="doctor">
       <div class="doctor-avatar">
@@ -24,8 +26,8 @@
     <div class="date-section">
       <h3 class="section-title">选择日期</h3>
       <div class="date-tabs">
-        <div 
-          v-for="date in availableDates" 
+        <div
+          v-for="date in availableDates"
           :key="date.date"
           class="date-tab"
           :class="{ active: selectedDate === date.date, disabled: date.remainingSlots === 0 }"
@@ -45,8 +47,8 @@
     <div class="time-section" v-if="selectedDate">
       <h3 class="section-title">选择时段</h3>
       <div class="time-slots">
-        <div 
-          v-for="schedule in daySchedules" 
+        <div
+          v-for="schedule in daySchedules"
           :key="schedule.scheduleID"
           class="time-slot"
           :class="{ disabled: schedule.remainingSlots === 0, selected: selectedSchedule?.scheduleID === schedule.scheduleID }"
@@ -79,9 +81,9 @@
 
     <!-- 预约按钮 -->
     <div class="action-section">
-      <el-button 
-        type="primary" 
-        size="large" 
+      <el-button
+        type="primary"
+        size="large"
         :disabled="!selectedSchedule"
         @click="handleAppointment"
         :loading="submitting"
@@ -96,6 +98,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import BackHomeButton from '@/components/hospital/BackHomeButton.vue'
 import { doctorAPI } from '@/api/hospital/doctor'
 import { scheduleAPI } from '@/api/hospital/schedule'
 import { appointmentAPI } from '@/api/hospital/appointment'
@@ -180,7 +183,7 @@ const selectSchedule = (schedule: DoctorSchedule) => {
 
 const handleAppointment = async () => {
   if (!selectedSchedule.value) return
-  
+
   try {
     await ElMessageBox.confirm(
       `确认预约 ${doctor.value?.doctorName} 医生？\n挂号费：¥${selectedSchedule.value.price}`,
@@ -191,7 +194,7 @@ const handleAppointment = async () => {
         type: 'info'
       }
     )
-    
+
     submitting.value = true
     // TODO: 从用户信息获取patientID
     const patientID = 2001 // 临时测试ID
@@ -202,7 +205,7 @@ const handleAppointment = async () => {
       timeSlot: selectedSchedule.value.timeSlot,
       chiefComplaint: chiefComplaint.value
     })
-    
+
     if (res.code === 200) {
       ElMessage.success('预约成功！')
       router.push('/hospital/my-appointments')

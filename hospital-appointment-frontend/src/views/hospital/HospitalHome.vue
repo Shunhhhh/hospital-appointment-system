@@ -58,23 +58,12 @@
         </div>
       </div>
 
-      <!-- 科室分类导航 -->
-      <div v-if="!isSearching" class="department-types">
-        <div class="type-item" 
-             v-for="type in departmentTypes" 
-             :key="type.value"
-             @click="filterByType(type.value)">
-          <div class="type-icon">{{ type.icon }}</div>
-          <div class="type-name">{{ type.label }}</div>
-        </div>
-      </div>
-
       <!-- 科室列表 -->
       <div v-if="!isSearching" class="department-section">
         <h2 class="section-title">全部科室</h2>
         <div class="department-grid">
-          <div 
-            v-for="dept in filteredDepartments" 
+          <div
+            v-for="dept in filteredDepartments"
             :key="dept.departmentID"
             class="department-card"
             @click="goToDoctors(dept.departmentID)"
@@ -93,8 +82,8 @@
           <el-button size="small" @click="clearSearch">返回全部</el-button>
         </div>
         <div v-if="searchResults.length > 0" class="doctor-grid">
-          <div 
-            v-for="doctor in searchResults" 
+          <div
+            v-for="doctor in searchResults"
             :key="doctor.doctorID"
             class="doctor-card"
             @click="router.push(`/hospital/schedule/${doctor.doctorID}`)"
@@ -121,8 +110,8 @@
       <div v-if="!isSearching" class="doctor-section">
         <h2 class="section-title">推荐专家</h2>
         <div class="doctor-grid">
-          <div 
-            v-for="doctor in recommendedDoctors" 
+          <div
+            v-for="doctor in recommendedDoctors"
             :key="doctor.doctorID"
             class="doctor-card"
             @click="router.push(`/hospital/schedule/${doctor.doctorID}`)"
@@ -163,7 +152,6 @@ const departments = ref<Department[]>([])
 const recommendedDoctors = ref<Doctor[]>([])
 const searchResults = ref<Doctor[]>([])
 const isSearching = ref(false)
-const selectedType = ref<number | null>(null)
 
 // 登录状态
 const isLoggedIn = computed(() => !!localStorage.getItem('hospital_user'))
@@ -188,21 +176,7 @@ const handleLogout = async () => {
   router.push('/hospital/login')
 }
 
-const departmentTypes = [
-  { label: '内科', value: 1, icon: '🫀' },
-  { label: '外科', value: 2, icon: '🏥' },
-  { label: '儿科', value: 3, icon: '👶' },
-  { label: '妇科', value: 4, icon: '👩' },
-  { label: '骨科', value: 6, icon: '🦴' },
-  { label: '眼科', value: 7, icon: '👁' },
-  { label: '口腔科', value: 9, icon: '🦷' },
-  { label: '皮肤科', value: 10, icon: '🧴' },
-]
-
 const filteredDepartments = computed(() => {
-  if (selectedType.value) {
-    return departments.value.filter(d => d.departmentType === selectedType.value)
-  }
   return departments.value
 })
 
@@ -256,10 +230,6 @@ const clearSearch = () => {
   searchKeyword.value = ''
   searchResults.value = []
   isSearching.value = false
-}
-
-const filterByType = (type: number) => {
-  selectedType.value = selectedType.value === type ? null : type
 }
 
 const goToDoctors = (departmentId: number) => {

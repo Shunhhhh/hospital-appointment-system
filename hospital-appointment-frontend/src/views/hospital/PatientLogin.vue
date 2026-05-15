@@ -5,7 +5,7 @@
         <h1>医院预约挂号系统</h1>
         <p>便捷就医，从预约开始</p>
       </div>
-      
+
       <div class="login-tabs">
         <el-radio-group v-model="loginType">
           <el-radio-button label="patient">患者登录</el-radio-button>
@@ -16,18 +16,18 @@
 
       <el-form :model="loginForm" :rules="rules" ref="formRef">
         <el-form-item prop="phone">
-          <el-input 
-            v-model="loginForm.phone" 
+          <el-input
+            v-model="loginForm.phone"
             :placeholder="loginType === 'admin' ? '请输入管理员账号' : '请输入手机号'"
             size="large"
             prefix-icon="Phone"
           />
         </el-form-item>
-        
+
         <el-form-item prop="password">
-          <el-input 
-            v-model="loginForm.password" 
-            type="password" 
+          <el-input
+            v-model="loginForm.password"
+            type="password"
             placeholder="请输入密码"
             size="large"
             prefix-icon="Lock"
@@ -87,7 +87,7 @@ const handleLogin = async () => {
   try {
     await formRef.value.validate()
     loading.value = true
-    
+
     let res: any
 
     if (loginType.value === 'patient') {
@@ -126,7 +126,7 @@ const handleLogin = async () => {
         return
       }
     }
-    
+
     ElMessage.error(res?.message || '登录失败，请检查账号密码')
   } catch (error) {
     console.error('登录出错:', error)

@@ -26,6 +26,8 @@ export interface Appointment {
   cancelTime?: string
   isReviewed: number
   createTime: string
+  scheduleStartTime?: string
+  scheduleEndTime?: string
 }
 
 export interface CreateAppointmentData {
