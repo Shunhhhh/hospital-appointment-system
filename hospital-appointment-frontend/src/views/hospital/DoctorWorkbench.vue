@@ -1,5 +1,7 @@
 <template>
   <div class="doctor-workbench">
+    <BackHomeButton />
+
     <div class="header">
       <h1>医生工作台</h1>
       <div class="doctor-info">
@@ -34,7 +36,7 @@
         <h2>今日患者队列</h2>
         <el-button type="primary" @click="loadAppointments">刷新</el-button>
       </div>
-      
+
       <el-table :data="appointments" v-loading="loading" stripe>
         <el-table-column prop="appointmentNumber" label="序号" width="80" />
         <el-table-column label="患者姓名" width="120">
@@ -61,29 +63,37 @@
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button 
-              v-if="row.appointmentStatus === 2" 
-              type="primary" 
+            <el-button
+              v-if="row.appointmentStatus === 2"
+              type="primary"
               size="small"
               @click="startVisit(row)"
             >
               接诊
             </el-button>
-            <el-button 
-              v-if="row.appointmentStatus === 3" 
-              type="success" 
+            <el-button
+              v-if="row.appointmentStatus === 3"
+              type="success"
               size="small"
               @click="finishVisit(row)"
             >
               完成就诊
             </el-button>
-            <el-button 
-              v-if="row.appointmentStatus >= 4" 
-              type="info" 
+            <el-button
+              v-if="row.appointmentStatus >= 4"
+              type="info"
               size="small"
               disabled
             >
               已完成
+            </el-button>
+            <el-button
+              v-if="row.appointmentStatus === 8"
+              type="danger"
+              size="small"
+              disabled
+            >
+              已失效
             </el-button>
           </template>
         </el-table-column>
@@ -95,6 +105,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import BackHomeButton from '@/components/hospital/BackHomeButton.vue'
 import { appointmentAPI } from '@/api/hospital/appointment'
 import type { Appointment } from '@/api/hospital/appointment'
 
@@ -104,7 +115,7 @@ const doctor = ref<any>(null)
 
 const stats = computed(() => {
   const todayTotal = appointments.value.length
-  const checkedIn = appointments.value.filter(a => a.appointmentStatus >= 2).length
+  const checkedIn = appointments.value.filter(a => a.appointmentStatus >= 2 && a.appointmentStatus <= 4).length
   const finished = appointments.value.filter(a => a.appointmentStatus >= 4).length
   const remaining = appointments.value.filter(a => a.appointmentStatus === 2 || a.appointmentStatus === 3).length
   return { todayTotal, checkedIn, finished, remaining }
@@ -112,14 +123,14 @@ const stats = computed(() => {
 
 const getStatusType = (status: number) => {
   const types: Record<number, string> = {
-    1: 'info', 2: 'warning', 3: 'primary', 4: 'success', 5: 'info'
+    1: 'info', 2: 'warning', 3: 'primary', 4: 'success', 5: 'info', 6: 'info', 7: 'danger', 8: 'danger'
   }
   return types[status] || 'info'
 }
 
 const getStatusText = (status: number) => {
   const texts: Record<number, string> = {
-    1: '已预约', 2: '已签到', 3: '就诊中', 4: '已完成', 5: '已取消'
+    1: '已预约', 2: '已签到', 3: '就诊中', 4: '已完成', 5: '已取消', 6: '已退号', 7: '已爽约', 8: '已失效'
   }
   return texts[status] || '未知'
 }
@@ -155,6 +166,8 @@ const startVisit = async (row: Appointment) => {
     if (res.code === 200) {
       ElMessage.success('开始接诊')
       loadAppointments()
+    } else {
+      ElMessage.error(res.message || '操作失败')
     }
   } catch (error) {
     ElMessage.error('操作失败')
@@ -167,6 +180,8 @@ const finishVisit = async (row: Appointment) => {
     if (res.code === 200) {
       ElMessage.success('就诊完成')
       loadAppointments()
+    } else {
+      ElMessage.error(res.message || '操作失败')
     }
   } catch (error) {
     ElMessage.error('操作失败')

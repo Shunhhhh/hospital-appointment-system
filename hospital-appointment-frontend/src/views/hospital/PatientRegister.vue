@@ -121,7 +121,7 @@ const handleRegister = async () => {
   try {
     await formRef.value.validate()
     loading.value = true
-    
+
     const res = await patientAPI.register({
       patientName: registerForm.patientName,
       idCard: registerForm.idCard,
@@ -131,7 +131,7 @@ const handleRegister = async () => {
       patientBirthday: registerForm.patientBirthday,
       patientAddress: registerForm.patientAddress
     })
-    
+
     if (res.code === 200) {
       ElMessage.success('注册成功，请登录')
       router.push('/hospital/login')

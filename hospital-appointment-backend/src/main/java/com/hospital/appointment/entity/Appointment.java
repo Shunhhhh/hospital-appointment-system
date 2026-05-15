@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * 挂号记录实体类
@@ -46,7 +47,7 @@ public class Appointment implements Serializable {
     /** 主诉/病情描述 */
     private String chiefComplaint;
     
-    /** 挂号状态：0-待支付 1-已预约 2-已签到 3-就诊中 4-已完成 5-已取消 6-已退号 7-已爽约 */
+    /** 挂号状态：0-待支付 1-已预约 2-已签到 3-就诊中 4-已完成 5-已取消 6-已退号 7-已爽约 8-已失效 */
     private Integer appointmentStatus;
     
     /** 支付状态：0-待支付 1-已支付 2-已退款 */
@@ -88,4 +89,12 @@ public class Appointment implements Serializable {
     /** 非数据库字段：出诊日期-时段格式 */
     @TableField(exist = false)
     private String scheduleTimeStr;
+
+    /** 非数据库字段：排班开始时间 */
+    @TableField(exist = false)
+    private LocalTime scheduleStartTime;
+
+    /** 非数据库字段：排班结束时间 */
+    @TableField(exist = false)
+    private LocalTime scheduleEndTime;
 }
