@@ -11,13 +11,11 @@ import com.hospital.appointment.mapper.ScheduleMapper;
 import com.hospital.appointment.util.UUIDGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,15 +43,13 @@ public class AppointmentService {
      */
     @Transactional
     public String createAppointment(Appointment appointment) {
-        expireTimeoutAppointments();
-
         // 检查患者是否在黑名单
         Patient patient = patientMapper.selectById(appointment.getPatientID());
         if (patient != null && patient.getIsBlacklist() == 1) {
             throw new IllegalArgumentException("您已被列入黑名单，无法预约");
         }
         
-        // 检查同一患者在同一时段是否已有预约
+        // 检查同一患者在同一时段是否已有预约（包括所有有效状态）
         int conflict = appointmentMapper.countConflict(
             appointment.getPatientID(), appointment.getAppointmentDate(), appointment.getTimeSlot());
         if (conflict > 0) {
@@ -164,17 +160,6 @@ public class AppointmentService {
         Appointment appointment = appointmentMapper.selectById(id);
         if (appointment == null) {
             return false;
-        }
-        // 检查是否已超时（上午时段12:00后、下午时段18:00后不可签到）
-        if (appointment.getAppointmentDate().equals(LocalDate.now())) {
-            LocalTime now = LocalTime.now();
-            if ((appointment.getTimeSlot() == 1 && now.isAfter(LocalTime.of(12, 0))) ||
-                (appointment.getTimeSlot() == 2 && now.isAfter(LocalTime.of(18, 0)))) {
-                // 自动标记为爽约
-                appointment.setAppointmentStatus(7);
-                appointmentMapper.update(appointment);
-                throw new IllegalArgumentException("已超出签到时间，预约已失效");
-            }
         }
         // 检查是否已超时（上午时段12:00后、下午时段18:00后不可签到）
         if (appointment.getAppointmentDate().equals(LocalDate.now())) {

@@ -155,6 +155,7 @@ const departments = ref<Department[]>([])
 const recommendedDoctors = ref<Doctor[]>([])
 const searchResults = ref<Doctor[]>([])
 const isSearching = ref(false)
+const selectedType = ref<number | null>(null)
 
 // 登录状态
 const isLoggedIn = computed(() => !!localStorage.getItem('hospital_user'))
@@ -178,10 +179,6 @@ const handleLogout = async () => {
   ElMessage.success('已退出')
   router.push('/hospital/login')
 }
-
-const filteredDepartments = computed(() => {
-  return departments.value
-})
 
 const getDeptIcon = (type: number) => {
   const icons: Record<number, string> = {
