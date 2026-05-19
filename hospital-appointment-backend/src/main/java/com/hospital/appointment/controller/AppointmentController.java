@@ -19,6 +19,15 @@ public class AppointmentController {
     
     @Autowired
     private AppointmentService appointmentService;
+
+    /**
+     * 获取所有挂号记录（管理员）
+     */
+    @GetMapping("/admin/all")
+    public Result<List<Appointment>> getAllAppointments() {
+        List<Appointment> list = appointmentService.getAllAppointments();
+        return Result.success(list);
+    }
     
     /**
      * 创建挂号

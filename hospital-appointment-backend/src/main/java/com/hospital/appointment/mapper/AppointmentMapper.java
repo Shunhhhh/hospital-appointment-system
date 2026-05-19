@@ -11,6 +11,15 @@ import java.util.List;
  */
 @Mapper
 public interface AppointmentMapper {
+
+        @Select("SELECT a.*, ds.startTime AS scheduleStartTime, ds.endTime AS scheduleEndTime, d.doctorName, dept.departmentName, p.patientName " +
+                        "FROM appointment a " +
+                        "LEFT JOIN doctor_schedule ds ON a.scheduleID = ds.scheduleID " +
+                        "LEFT JOIN doctor d ON a.doctorID = d.doctorID " +
+                        "LEFT JOIN department dept ON a.departmentID = dept.departmentID " +
+                        "LEFT JOIN patient p ON a.patientID = p.patientID " +
+                        "ORDER BY a.appointmentDate DESC, a.timeSlot DESC, a.createTime DESC")
+        List<Appointment> selectAll();
     
     @Select("<script>" +
                         "SELECT a.*, ds.startTime AS scheduleStartTime, ds.endTime AS scheduleEndTime, d.doctorName, dept.departmentName, p.patientName " +

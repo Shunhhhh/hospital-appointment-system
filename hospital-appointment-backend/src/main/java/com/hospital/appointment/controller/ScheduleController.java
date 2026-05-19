@@ -20,6 +20,15 @@ public class ScheduleController {
     
     @Autowired
     private ScheduleService scheduleService;
+
+    /**
+     * 获取所有排班（管理员）
+     */
+    @GetMapping("/admin/all")
+    public Result<List<DoctorSchedule>> getAllSchedules() {
+        List<DoctorSchedule> list = scheduleService.getAllSchedules();
+        return Result.success(list);
+    }
     
     /**
      * 获取医生排班列表
@@ -128,6 +137,14 @@ public class ScheduleController {
      */
     @PutMapping("/{id}/stop")
     public Result<String> stopSchedule(@PathVariable Long id) {
+        // 先检查排班是否存在以及是否已过期，避免对已过日期执行停诊
+        DoctorSchedule ds = scheduleService.getScheduleById(id);
+        if (ds == null) {
+            return Result.error("排班不存在");
+        }
+        if (ds.getScheduleDate() != null && ds.getScheduleDate().isBefore(LocalDate.now())) {
+            return Result.error("不能对已过期的排班停诊");
+        }
         boolean success = scheduleService.stopSchedule(id);
         if (success) {
             return Result.success("停诊成功");

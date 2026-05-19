@@ -32,6 +32,13 @@ export interface ScheduleQuery {
 
 export const scheduleAPI = {
   /**
+   * 获取所有排班（管理员）
+   */
+  getAll: () => {
+    return request.get<DoctorSchedule[]>('/hospital/schedule/admin/all')
+  },
+
+  /**
    * 获取医生排班列表
    */
   getByDoctor: (doctorId: number) => {

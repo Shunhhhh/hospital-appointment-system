@@ -27,9 +27,6 @@
                 <el-dropdown-item v-if="userType === 'doctor'" @click="router.push('/hospital/doctor/workbench')">
                   医生工作台
                 </el-dropdown-item>
-                <el-dropdown-item v-if="userType === 'admin'" @click="router.push('/admin')">
-                  管理后台
-                </el-dropdown-item>
                 <el-dropdown-item divided @click="handleLogout">
                   退出登录
                 </el-dropdown-item>
