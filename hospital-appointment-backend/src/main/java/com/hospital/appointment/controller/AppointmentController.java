@@ -34,11 +34,15 @@ public class AppointmentController {
      */
     @PostMapping
     public Result<String> createAppointment(@RequestBody Appointment appointment) {
-        String appointmentID = appointmentService.createAppointment(appointment);
-        if (appointmentID != null) {
-            return Result.success(appointmentID);
+        try {
+            String appointmentID = appointmentService.createAppointment(appointment);
+            if (appointmentID != null) {
+                return Result.success(appointmentID);
+            }
+            return Result.error("挂号失败");
+        } catch (IllegalArgumentException e) {
+            return Result.error(e.getMessage());
         }
-        return Result.error("挂号失败，可能号源已满");
     }
     
     /**

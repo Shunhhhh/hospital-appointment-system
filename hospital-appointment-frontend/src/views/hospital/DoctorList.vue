@@ -1,7 +1,8 @@
 <template>
   <div class="doctor-list">
-    <BackHomeButton />
-
+    <div class="back-bar">
+      <el-button text @click="router.push('/hospital/home')">← 返回首页</el-button>
+    </div>
     <!-- 筛选区域 -->
     <div class="filter-section">
       <el-select v-model="selectedTitle" placeholder="选择职称" clearable @change="handleFilter">
@@ -117,7 +118,7 @@ const handleFilter = () => {
 }
 
 const goToDetail = (doctorId: number) => {
-  router.push(`/hospital/doctor/${doctorId}`)
+  router.push(`/hospital/schedule/${doctorId}`)
 }
 
 const goToSchedule = (doctorId: number) => {
@@ -264,5 +265,9 @@ onMounted(() => {
   color: #f56c6c;
   font-size: 18px;
   font-weight: bold;
+}
+
+.back-bar {
+  margin-bottom: 16px;
 }
 </style>

@@ -1,7 +1,8 @@
 <template>
   <div class="appointment-page">
-    <BackHomeButton />
-
+    <div class="back-bar">
+      <el-button text @click="router.push('/hospital/home')">← 返回首页</el-button>
+    </div>
     <h1 class="page-title">选择预约时间</h1>
 
     <!-- 医生信息卡片 -->
@@ -430,5 +431,9 @@ onMounted(() => {
   width: 200px;
   height: 50px;
   font-size: 16px;
+}
+
+.back-bar {
+  margin-bottom: 16px;
 }
 </style>
