@@ -40,6 +40,13 @@ export interface CreateAppointmentData {
 
 export const appointmentAPI = {
   /**
+   * 获取所有挂号记录（管理员）
+   */
+  getAll: () => {
+    return request.get<Appointment[]>('/hospital/appointment/admin/all')
+  },
+
+  /**
    * 创建挂号
    */
   create: (data: CreateAppointmentData) => {

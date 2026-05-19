@@ -11,12 +11,20 @@ import java.util.List;
  */
 @Mapper
 public interface ScheduleMapper {
+
+        @Select("SELECT ds.*, d.doctorName, d.title AS doctorTitle, dept.departmentName, dept.departmentID " +
+                        "FROM doctor_schedule ds " +
+                        "LEFT JOIN doctor d ON ds.doctorID = d.doctorID " +
+                        "LEFT JOIN department dept ON d.departmentID = dept.departmentID " +
+                        "ORDER BY ds.scheduleDate DESC, ds.timeSlot ASC, ds.scheduleID DESC")
+        List<DoctorSchedule> selectAll();
     
     @Select("SELECT ds.*, d.doctorName, d.title AS doctorTitle, dept.departmentName, dept.departmentID " +
             "FROM doctor_schedule ds " +
             "LEFT JOIN doctor d ON ds.doctorID = d.doctorID " +
             "LEFT JOIN department dept ON d.departmentID = dept.departmentID " +
             "WHERE ds.doctorID = #{doctorId} AND ds.scheduleDate >= CURDATE() " +
+            "AND ds.scheduleStatus = 1 AND ds.remainingSlots > 0 " +
             "ORDER BY ds.scheduleDate ASC, ds.timeSlot ASC")
     List<DoctorSchedule> selectByDoctor(Long doctorId);
     

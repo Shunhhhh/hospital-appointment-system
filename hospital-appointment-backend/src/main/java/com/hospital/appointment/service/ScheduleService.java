@@ -25,6 +25,28 @@ public class ScheduleService {
     private DoctorMapper doctorMapper;
     
     /**
+     * 获取所有排班
+     */
+    public List<DoctorSchedule> getAllSchedules() {
+        List<DoctorSchedule> list = scheduleMapper.selectAll();
+        // 动态修正过期或已约满的状态，避免前端显示过期日期仍为可预约
+        LocalDate today = LocalDate.now();
+        for (DoctorSchedule ds : list) {
+            if (ds.getScheduleDate() != null) {
+                if (ds.getScheduleDate().isBefore(today)) {
+                    ds.setScheduleStatus(0); // 已过期/不可预约
+                    continue;
+                }
+            }
+            // 如果剩余号源为0，则标记为已约满
+            if (ds.getRemainingSlots() == null || ds.getRemainingSlots() <= 0) {
+                ds.setScheduleStatus(2);
+            }
+        }
+        return list;
+    }
+
+    /**
      * 获取医生排班列表
      */
     public List<DoctorSchedule> getScheduleByDoctor(Long doctorId) {
@@ -160,6 +182,12 @@ public class ScheduleService {
      * 停诊
      */
     public boolean stopSchedule(Long id) {
+        DoctorSchedule ds = scheduleMapper.selectById(id);
+        if (ds == null) return false;
+        // 不允许对已过日期的排班进行停诊
+        if (ds.getScheduleDate() != null && ds.getScheduleDate().isBefore(LocalDate.now())) {
+            return false;
+        }
         return scheduleMapper.updateStatus(id, 0) > 0;
     }
     

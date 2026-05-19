@@ -6,6 +6,7 @@ import MyAppointments from '@/views/hospital/MyAppointments.vue'
 import PatientLogin from '@/views/hospital/PatientLogin.vue'
 import PatientRegister from '@/views/hospital/PatientRegister.vue'
 import DoctorWorkbench from '@/views/hospital/DoctorWorkbench.vue'
+import AdminDashboard from '@/views/hospital/AdminDashboard.vue'
 import ReviewForm from '@/views/hospital/ReviewForm.vue'
 import PatientProfile from '@/views/hospital/PatientProfile.vue'
 
@@ -20,6 +21,12 @@ export const hospitalRoutes = [
     name: 'HospitalHome',
     component: HospitalHome,
     meta: { title: '医院首页', hideLayout: true }
+  },
+  {
+    path: '/hospital/admin',
+    name: 'HospitalAdminDashboard',
+    component: AdminDashboard,
+    meta: { title: '管理员后台', hideLayout: true }
   },
   {
     path: '/hospital/login',

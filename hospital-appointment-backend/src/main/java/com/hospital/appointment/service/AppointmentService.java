@@ -37,6 +37,14 @@ public class AppointmentService {
     
     @Autowired
     private PatientMapper patientMapper;
+
+    /**
+     * 获取所有挂号记录
+     */
+    public List<Appointment> getAllAppointments() {
+        expireTimeoutAppointments();
+        return appointmentMapper.selectAll();
+    }
     
     /**
      * 创建挂号

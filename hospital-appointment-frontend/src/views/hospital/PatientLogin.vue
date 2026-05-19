@@ -125,7 +125,7 @@ const handleLogin = async () => {
           type: 'admin',
           ...res.data
         }))
-        router.push('/hospital/home')
+        router.push('/hospital/admin')
         return
       }
     }
