@@ -78,9 +78,15 @@ public interface AppointmentMapper {
             "LEFT JOIN patient p ON a.patientID = p.patientID " +
             "WHERE a.appointmentStatus = 1 AND TIMESTAMP(a.appointmentDate, ds.startTime) <= DATE_SUB(NOW(), INTERVAL 5 MINUTE)")
     List<Appointment> selectTimeoutAppointments();
+
+    @Select("SELECT a.* FROM appointment a WHERE a.appointmentDate = #{date} AND a.appointmentStatus = 1 ORDER BY a.appointmentNumber ASC")
+    List<Appointment> selectTodayAppointments(@Param("date") LocalDate date);
     
     @Select("SELECT COUNT(*) FROM appointment WHERE doctorID = #{doctorId} AND appointmentDate = #{date}")
     long countByDoctorAndDate(@Param("doctorId") Long doctorId, @Param("date") LocalDate date);
+
+    @Select("SELECT COUNT(*) FROM appointment WHERE patientID = #{patientId} AND appointmentDate = #{date} AND timeSlot = #{timeSlot} AND appointmentStatus IN (1,2,3)")
+    int countConflict(@Param("patientId") Long patientId, @Param("date") LocalDate date, @Param("timeSlot") Integer timeSlot);
     
     @Insert("INSERT INTO appointment (appointmentID, patientID, scheduleID, doctorID, departmentID, " +
             "appointmentDate, timeSlot, appointmentNumber, chiefComplaint, appointmentStatus, paymentStatus, " +
@@ -100,6 +106,13 @@ public interface AppointmentMapper {
     @Update("UPDATE appointment SET isReviewed = #{isReviewed} WHERE appointmentID = #{appointmentID}")
     int updateIsReviewed(@Param("appointmentID") String appointmentID, @Param("isReviewed") Integer isReviewed);
     
+    @Select("SELECT a.* FROM appointment a " +
+            "JOIN doctor_schedule ds ON a.scheduleID = ds.scheduleID " +
+            "WHERE a.appointmentDate = #{date} AND a.appointmentStatus = 1 " +
+            "AND ((ds.timeSlot = 1 AND DATE_ADD(CURDATE(), INTERVAL 12 HOUR) > NOW()) " +
+            "OR (ds.timeSlot = 2 AND CONCAT(CURDATE(), ' 18:00:00') < NOW()))")
+    List<Appointment> selectOverdueAppointments(@Param("date") LocalDate date);
+
     @Delete("DELETE FROM appointment WHERE appointmentID = #{id}")
     int deleteById(String id);
 }

@@ -30,6 +30,9 @@
                 <el-dropdown-item v-if="userType === 'admin'" @click="router.push('/admin')">
                   管理后台
                 </el-dropdown-item>
+                <el-dropdown-item v-if="userType === 'patient'" @click="router.push('/hospital/profile')">
+                  个人信息
+                </el-dropdown-item>
                 <el-dropdown-item divided @click="handleLogout">
                   退出登录
                 </el-dropdown-item>
@@ -187,6 +190,13 @@ const getDeptIcon = (type: number) => {
   }
   return icons[type] || '🏥'
 }
+
+const filteredDepartments = computed(() => {
+  if (selectedType.value) {
+    return departments.value.filter(d => d.departmentType === selectedType.value)
+  }
+  return departments.value
+})
 
 const loadDepartments = async () => {
   try {

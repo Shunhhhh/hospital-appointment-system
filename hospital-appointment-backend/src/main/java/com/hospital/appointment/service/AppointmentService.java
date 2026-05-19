@@ -11,13 +11,16 @@ import com.hospital.appointment.mapper.ScheduleMapper;
 import com.hospital.appointment.util.UUIDGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 挂号预约服务类
@@ -47,23 +50,20 @@ public class AppointmentService {
         // 检查患者是否在黑名单
         Patient patient = patientMapper.selectById(appointment.getPatientID());
         if (patient != null && patient.getIsBlacklist() == 1) {
-            throw new AppointmentException("患者已在黑名单中，无法预约");
+            throw new IllegalArgumentException("您已被列入黑名单，无法预约");
+        }
+        
+        // 检查同一患者在同一时段是否已有预约
+        int conflict = appointmentMapper.countConflict(
+            appointment.getPatientID(), appointment.getAppointmentDate(), appointment.getTimeSlot());
+        if (conflict > 0) {
+            throw new IllegalArgumentException("您在该时段已有预约，请先取消或选择其他时段");
         }
         
         // 检查号源
         DoctorSchedule schedule = scheduleMapper.selectById(appointment.getScheduleID());
-        if (schedule == null) {
-            throw new AppointmentException("排班不存在");
-        }
-        if (schedule.getScheduleStatus() == null || schedule.getScheduleStatus() != 1 || schedule.getRemainingSlots() <= 0) {
-            throw new AppointmentException("号源已满或当前排班不可预约");
-        }
-
-        Appointment conflict = appointmentMapper.selectByPatientAndSlot(
-            appointment.getPatientID(), schedule.getScheduleDate(), schedule.getTimeSlot()
-        );
-        if (conflict != null) {
-            throw new AppointmentException("同一患者在同一时间段不能重复预约");
+        if (schedule == null || schedule.getRemainingSlots() <= 0) {
+            throw new IllegalArgumentException("号源已满，请选择其他时段");
         }
         
         // 获取医生和科室信息
@@ -163,7 +163,29 @@ public class AppointmentService {
     public boolean checkIn(String id) {
         Appointment appointment = appointmentMapper.selectById(id);
         if (appointment == null) {
-            throw new AppointmentException("挂号记录不存在");
+            return false;
+        }
+        // 检查是否已超时（上午时段12:00后、下午时段18:00后不可签到）
+        if (appointment.getAppointmentDate().equals(LocalDate.now())) {
+            LocalTime now = LocalTime.now();
+            if ((appointment.getTimeSlot() == 1 && now.isAfter(LocalTime.of(12, 0))) ||
+                (appointment.getTimeSlot() == 2 && now.isAfter(LocalTime.of(18, 0)))) {
+                // 自动标记为爽约
+                appointment.setAppointmentStatus(7);
+                appointmentMapper.update(appointment);
+                throw new IllegalArgumentException("已超出签到时间，预约已失效");
+            }
+        }
+        // 检查是否已超时（上午时段12:00后、下午时段18:00后不可签到）
+        if (appointment.getAppointmentDate().equals(LocalDate.now())) {
+            LocalTime now = LocalTime.now();
+            if ((appointment.getTimeSlot() == 1 && now.isAfter(LocalTime.of(12, 0))) ||
+                (appointment.getTimeSlot() == 2 && now.isAfter(LocalTime.of(18, 0)))) {
+                // 自动标记为爽约
+                appointment.setAppointmentStatus(7);
+                appointmentMapper.update(appointment);
+                throw new IllegalArgumentException("已超出签到时间，预约已失效");
+            }
         }
         if (appointment.getAppointmentStatus() == null || appointment.getAppointmentStatus() != 1) {
             throw new AppointmentException("当前状态不可签到");
@@ -173,6 +195,33 @@ public class AppointmentService {
             throw new AppointmentException("已超过签到时限，挂号已失效");
         }
         return appointmentMapper.updateStatus(appointment.getAppointmentID(), 2) > 0;
+    }
+    
+    /**
+     * 定时任务：每10分钟检查一次超时未签到的预约，自动标记为爽约
+     */
+    @Scheduled(fixedRate = 600000)
+    @Transactional
+    public void autoCancelNoShow() {
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+        
+        // 获取今天所有已预约(1)的记录
+        List<Appointment> allToday = appointmentMapper.selectTodayAppointments(today);
+        if (allToday == null) return;
+        
+        List<Appointment> overdue = allToday.stream()
+            .filter(a -> a.getAppointmentStatus() == 1)
+            .filter(a -> (a.getTimeSlot() == 1 && now.isAfter(LocalTime.of(12, 0))) ||
+                         (a.getTimeSlot() == 2 && now.isAfter(LocalTime.of(18, 0))))
+            .collect(Collectors.toList());
+        
+        for (Appointment apt : overdue) {
+            apt.setAppointmentStatus(7); // 已爽约
+            appointmentMapper.update(apt);
+            // 释放号源
+            scheduleMapper.incrementSlots(apt.getScheduleID());
+        }
     }
     
     /**

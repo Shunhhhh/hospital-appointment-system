@@ -5,8 +5,18 @@
     <div class="header">
       <h1>医生工作台</h1>
       <div class="doctor-info">
-        <el-avatar :size="40">{{ doctor?.doctorName?.charAt(0) }}</el-avatar>
-        <span>{{ doctor?.doctorName }} {{ doctor?.title }}</span>
+        <el-dropdown trigger="click">
+          <span class="user-dropdown">
+            <el-avatar :size="40">{{ doctor?.doctorName?.charAt(0) }}</el-avatar>
+            <span>{{ doctor?.doctorName }} {{ doctor?.title }}</span>
+            <el-icon><ArrowDown /></el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="handleLogout">退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
     </div>
 
@@ -104,11 +114,14 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { ArrowDown } from '@element-plus/icons-vue'
 import BackHomeButton from '@/components/hospital/BackHomeButton.vue'
 import { appointmentAPI } from '@/api/hospital/appointment'
 import type { Appointment } from '@/api/hospital/appointment'
 
+const router = useRouter()
 const loading = ref(false)
 const appointments = ref<Appointment[]>([])
 const doctor = ref<any>(null)
@@ -143,6 +156,13 @@ const loadDoctor = () => {
       doctor.value = user
     }
   }
+}
+
+const handleLogout = async () => {
+  await ElMessageBox.confirm('确认退出登录？', '提示')
+  localStorage.removeItem('hospital_user')
+  ElMessage.success('已退出')
+  router.push('/hospital/login')
 }
 
 const loadAppointments = async () => {
@@ -266,5 +286,19 @@ onMounted(() => {
 .section-header h2 {
   font-size: 18px;
   color: #333;
+}
+
+.user-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.user-dropdown:hover {
+  background: #f0f2f5;
 }
 </style>

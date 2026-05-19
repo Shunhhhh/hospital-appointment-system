@@ -1,7 +1,8 @@
 <template>
   <div class="my-appointments">
-    <BackHomeButton />
-
+    <div class="back-bar">
+      <el-button text @click="router.push('/hospital/home')">← 返回首页</el-button>
+    </div>
     <h1 class="page-title">我的挂号</h1>
 
     <!-- 状态筛选 -->
@@ -281,5 +282,9 @@ onMounted(() => {
 .waiting-hint {
   color: #67c23a;
   font-size: 14px;
+}
+
+.back-bar {
+  margin-bottom: 16px;
 }
 </style>

@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 })
 @EnableScheduling
 @MapperScan({"com.nbucs.studyroombackend.mapper", "com.hospital.appointment.mapper"})
+@EnableScheduling
 public class StudyRoomBackendApplication {
 
     public static void main(String[] args) {

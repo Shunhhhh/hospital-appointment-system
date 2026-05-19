@@ -1,6 +1,9 @@
 <template>
   <div class="register-page">
     <div class="register-box">
+      <div class="back-bar">
+        <el-button text @click="router.push('/hospital/home')">← 返回首页</el-button>
+      </div>
       <div class="register-header">
         <h1>用户注册</h1>
         <p>完善个人信息，开始便捷就医</p>
@@ -193,5 +196,9 @@ const goToLogin = () => {
   color: #999;
   font-size: 14px;
   margin-top: 20px;
+}
+
+.back-bar {
+  margin-bottom: 16px;
 }
 </style>
