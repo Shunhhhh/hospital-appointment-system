@@ -1,9 +1,6 @@
 <template>
   <div class="login-page">
     <div class="login-box">
-      <div class="back-bar">
-        <el-button text @click="router.push('/hospital/home')">← 返回首页</el-button>
-      </div>
       <div class="login-header">
         <h1>医院预约挂号系统</h1>
         <p>便捷就医，从预约开始</p>
@@ -210,9 +207,5 @@ const goToRegister = () => {
   color: #999;
   font-size: 14px;
   margin-top: 15px;
-}
-
-.back-bar {
-  margin-bottom: 16px;
 }
 </style>
