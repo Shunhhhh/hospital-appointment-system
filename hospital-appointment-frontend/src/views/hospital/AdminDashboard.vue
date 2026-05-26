@@ -57,7 +57,7 @@
         </el-table>
       </el-tab-pane>
 
-      <el-tab-pane label="医生管理 / 排班" name="doctor">
+      <el-tab-pane label="医生管理" name="doctor">
         <div class="pane-toolbar">
           <el-button type="primary" @click="openDoctorDialog()">新增医生</el-button>
           <el-button @click="loadDoctors">刷新医生</el-button>
@@ -85,8 +85,9 @@
           </el-table-column>
         </el-table>
 
-        <el-divider content-position="left">排班管理</el-divider>
+      </el-tab-pane>
 
+      <el-tab-pane label="排班管理" name="schedule">
         <div class="pane-toolbar">
           <el-select v-model="scheduleDoctorFilter" placeholder="按医生筛选" clearable style="width: 220px" @change="loadSchedules">
             <el-option v-for="doctor in doctors" :key="doctor.doctorID" :label="`${doctor.doctorName}(${doctor.doctorID})`" :value="doctor.doctorID" />
@@ -94,7 +95,7 @@
           <el-button @click="loadSchedules">刷新排班</el-button>
         </div>
 
-        <el-table :data="schedules" border stripe v-loading="scheduleLoading" style="width: 100%">
+        <el-table :data="pagedSchedules" border stripe v-loading="scheduleLoading" style="width: 100%">
           <el-table-column prop="scheduleID" label="排班ID" width="100" />
           <el-table-column prop="doctorName" label="医生" min-width="120" />
           <el-table-column prop="departmentName" label="科室" min-width="120" />
@@ -116,6 +117,16 @@
             </template>
           </el-table-column>
         </el-table>
+
+        <div class="pagination-wrap">
+          <el-pagination
+            v-model:current-page="scheduleCurrentPage"
+            v-model:page-size="schedulePageSize"
+            :page-sizes="[10, 20, 50]"
+            layout="total, sizes, prev, pager, next"
+            :total="schedules.length"
+          />
+        </div>
       </el-tab-pane>
 
       <el-tab-pane label="挂号管理" name="appointment">
@@ -184,11 +195,10 @@
     <el-dialog v-model="scheduleDialogVisible" :title="scheduleForm.scheduleID ? '编辑排班' : '新增排班'" width="620px">
       <el-form :model="scheduleForm" label-width="100px">
         <el-row :gutter="12">
-          <el-col :span="12"><el-form-item label="医生ID"><el-input-number v-model="scheduleForm.doctorID" :min="1" /></el-form-item></el-col>
           <el-col :span="12"><el-form-item label="日期"><el-date-picker v-model="scheduleForm.scheduleDate" type="date" value-format="YYYY-MM-DD" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="12">
-          <el-col :span="12"><el-form-item label="时段"><el-select v-model="scheduleForm.timeSlot"><el-option label="上午" :value="1" /><el-option label="下午" :value="2" /><el-option label="夜诊" :value="3" /></el-select></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="时段"><el-select v-model="scheduleForm.timeSlot"><el-option label="上午" :value="1" /><el-option label="下午" :value="2" /></el-select></el-form-item></el-col>
           <el-col :span="12"><el-form-item label="状态"><el-select v-model="scheduleForm.scheduleStatus"><el-option label="可预约" :value="1" /><el-option label="不可用" :value="0" /></el-select></el-form-item></el-col>
         </el-row>
         <el-row :gutter="12">
@@ -201,7 +211,6 @@
         </el-row>
         <el-row :gutter="12">
           <el-col :span="12"><el-form-item label="挂号费"><el-input-number v-model="scheduleForm.price" :min="0" :step="1" /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item label="号源类型"><el-input-number v-model="scheduleForm.registrationType" :min="1" :max="3" /></el-form-item></el-col>
         </el-row>
       </el-form>
       <template #footer>
@@ -244,6 +253,8 @@ const doctors = ref<Doctor[]>([])
 const schedules = ref<DoctorSchedule[]>([])
 const appointments = ref<Appointment[]>([])
 const scheduleDoctorFilter = ref<number | undefined>()
+const scheduleCurrentPage = ref(1)
+const schedulePageSize = ref(10)
 
 const departmentLoading = ref(false)
 const doctorLoading = ref(false)
@@ -257,6 +268,11 @@ const scheduleDialogVisible = ref(false)
 const departmentForm = reactive<Partial<Department>>({})
 const doctorForm = reactive<Partial<Doctor & { doctorPassword?: string }>>({ doctorStatus: 1 })
 const scheduleForm = reactive<Partial<DoctorSchedule>>({ scheduleStatus: 1, timeSlot: 1, registrationType: 1 })
+
+const pagedSchedules = computed(() => {
+  const start = (scheduleCurrentPage.value - 1) * schedulePageSize.value
+  return schedules.value.slice(start, start + schedulePageSize.value)
+})
 
 const departmentStatusSwitch = computed({
   get: () => departmentForm.departmentStatus === 1,
@@ -303,11 +319,16 @@ const loadSchedules = async () => {
   try {
     const res = scheduleDoctorFilter.value ? await scheduleAPI.getByDoctor(scheduleDoctorFilter.value) : await scheduleAPI.getAll()
     schedules.value = res.code === 200 ? (res.data || []) : []
+    scheduleCurrentPage.value = 1
   } catch {
     ElMessage.error('加载排班失败')
   } finally {
     scheduleLoading.value = false
   }
+}
+
+const resetReactiveForm = <T extends Record<string, unknown>>(form: T) => {
+  ;(Object.keys(form) as Array<keyof T>).forEach((key) => delete form[key])
 }
 
 const loadAppointments = async () => {
@@ -351,6 +372,7 @@ const removeDepartment = async (id: number) => {
 }
 
 const openDoctorDialog = (row?: Doctor) => {
+  resetReactiveForm(doctorForm as Record<string, unknown>)
   Object.assign(doctorForm, row ? { ...row, doctorPassword: '' } : { doctorStatus: 1, doctorGender: 1, registrationFee: 0 })
   doctorDialogVisible.value = true
 }
@@ -383,17 +405,22 @@ const removeDoctor = async (id: number) => {
 }
 
 const openScheduleDialog = (row?: Partial<DoctorSchedule> & { doctorID?: number }) => {
+  resetReactiveForm(scheduleForm as Record<string, unknown>)
   Object.assign(scheduleForm, row ? { ...row } : { scheduleStatus: 1, timeSlot: 1, registrationType: 1 })
   scheduleDialogVisible.value = true
 }
 
 const saveSchedule = async () => {
   try {
+    const payload = {
+      ...scheduleForm,
+      registrationType: scheduleForm.registrationType ?? 1
+    }
     if (scheduleForm.scheduleID) {
-      await scheduleAPI.update(scheduleForm.scheduleID, scheduleForm)
+      await scheduleAPI.update(scheduleForm.scheduleID, payload)
       ElMessage.success('排班已更新')
     } else {
-      await scheduleAPI.add(scheduleForm)
+      await scheduleAPI.add(payload)
       ElMessage.success('排班已新增')
     }
     scheduleDialogVisible.value = false
@@ -437,6 +464,7 @@ const handleLogout = async () => {
 watch(activeTab, (value) => {
   if (value === 'department' && departments.value.length === 0) loadDepartments()
   if (value === 'doctor' && doctors.value.length === 0) loadDoctors()
+  if (value === 'schedule' && schedules.value.length === 0) loadSchedules()
   if (value === 'appointment' && appointments.value.length === 0) loadAppointments()
 })
 
@@ -542,6 +570,12 @@ onMounted(async () => {
   align-items: center;
   margin-bottom: 16px;
   flex-wrap: wrap;
+}
+
+.pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 
 @media (max-width: 1100px) {
