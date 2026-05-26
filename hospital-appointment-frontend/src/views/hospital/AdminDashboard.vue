@@ -78,9 +78,11 @@
           </el-table-column>
           <el-table-column label="操作" width="220" fixed="right">
             <template #default="scope">
-              <el-button text type="primary" @click="openDoctorDialog(scope.row)">编辑</el-button>
-              <el-button text type="warning" @click="openScheduleDialog(scope.row)">排班</el-button>
-              <el-button text type="danger" @click="removeDoctor(scope.row.doctorID)">删除</el-button>
+              <div class="action-row">
+                <el-button text type="primary" @click="openDoctorDialog(scope.row)">编辑</el-button>
+                <el-button text type="warning" @click="openScheduleDialog(scope.row)">排班</el-button>
+                <el-button text type="danger" @click="removeDoctor(scope.row.doctorID)">删除</el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -111,9 +113,11 @@
           </el-table-column>
           <el-table-column label="操作" width="220" fixed="right">
             <template #default="scope">
-              <el-button text type="primary" @click="openScheduleDialog(scope.row)">编辑</el-button>
-              <el-button text type="warning" @click="stopSchedule(scope.row.scheduleID)">停诊</el-button>
-              <el-button text type="danger" @click="removeSchedule(scope.row.scheduleID)">删除</el-button>
+              <div class="action-row">
+                <el-button text type="primary" @click="openScheduleDialog(scope.row)">编辑</el-button>
+                <el-button text type="warning" @click="stopSchedule(scope.row.scheduleID)">停诊</el-button>
+                <el-button text type="danger" @click="removeSchedule(scope.row.scheduleID)">删除</el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -156,7 +160,11 @@
     <el-dialog v-model="departmentDialogVisible" :title="departmentForm.departmentID ? '编辑科室' : '新增科室'" width="520px">
       <el-form :model="departmentForm" label-width="100px">
         <el-form-item label="科室名称"><el-input v-model="departmentForm.departmentName" /></el-form-item>
-        <el-form-item label="科室类型"><el-input-number v-model="departmentForm.departmentType" :min="1" :max="12" /></el-form-item>
+        <el-form-item label="科室类型">
+          <el-select v-model="departmentForm.departmentType" filterable placeholder="请选择科室">
+            <el-option v-for="dept in departments" :key="dept.departmentID" :label="dept.departmentName" :value="dept.departmentName" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="科室位置"><el-input v-model="departmentForm.departmentLocation" /></el-form-item>
         <el-form-item label="科室简介"><el-input v-model="departmentForm.departmentDesc" type="textarea" :rows="3" /></el-form-item>
         <el-form-item label="状态"><el-switch v-model="departmentStatusSwitch" active-text="正常" inactive-text="停诊" /></el-form-item>
@@ -178,7 +186,13 @@
           <el-col :span="12"><el-form-item label="性别"><el-select v-model="doctorForm.doctorGender" placeholder="请选择"><el-option label="男" :value="1" /><el-option label="女" :value="2" /></el-select></el-form-item></el-col>
         </el-row>
         <el-row :gutter="12">
-          <el-col :span="12"><el-form-item label="科室ID"><el-input-number v-model="doctorForm.departmentID" :min="1" /></el-form-item></el-col>
+          <el-col :span="12">
+            <el-form-item label="科室">
+              <el-select v-model="doctorForm.departmentID" filterable placeholder="请选择科室">
+                <el-option v-for="dept in departments" :key="dept.departmentID" :label="dept.departmentName" :value="dept.departmentID" />
+              </el-select>
+            </el-form-item>
+          </el-col>
           <el-col :span="12"><el-form-item label="职称"><el-input v-model="doctorForm.title" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="12">
@@ -570,6 +584,13 @@ onMounted(async () => {
   align-items: center;
   margin-bottom: 16px;
   flex-wrap: wrap;
+}
+
+.action-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap;
 }
 
 .pagination-wrap {
