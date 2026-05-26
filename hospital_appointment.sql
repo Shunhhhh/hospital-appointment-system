@@ -25,7 +25,7 @@ CREATE TABLE `admin` (
   UNIQUE INDEX `uk_admin_id`(`adminID` ASC) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '管理员表' ROW_FORMAT = Dynamic;
 
-INSERT INTO `admin` VALUES (1, '$2a$10$OyXnTF90DHtmPUFvCdh9eO20hsXDu6z0H3tneWs.xGHK8ScwU4jfy', '系统管理员', 1, '99999999999', '系统管理员');
+INSERT INTO `admin` VALUES (1, '$2a$10$Ggxx3lRWbSO67dwWHRWQU.BqTp1m8of.jTHl/nJvKw5OmVF4Lc7b.', '系统管理员', 1, '99999999999', '系统管理员');
 
 -- =============================================
 -- 2. 科室表 (改造自自习室)
@@ -86,11 +86,11 @@ CREATE TABLE `doctor` (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1001 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '医生表' ROW_FORMAT = Dynamic;
 
 INSERT INTO `doctor` VALUES 
-(1001, '张明', '$2a$10$OyXnTF90DHtmPUFvCdh9eO20hsXDu6z0H3tneWs.xGHK8ScwU4jfy', 1, '13800001001', 'zhangming@hospital.com', 1, '主任医师', '心血管疾病、高血压、冠心病', '从事内科临床工作30年，擅长心血管疾病的诊治', NULL, 30.00, 1, NOW()),
-(1002, '李华', '$2a$10$OyXnTF90DHtmPUFvCdh9eO20hsXDu6z0H3tneWs.xGHK8ScwU4jfy', 2, '13800001002', 'lihua@hospital.com', 1, '副主任医师', '糖尿病、甲状腺疾病', '内分泌科专家，20年临床经验', NULL, 20.00, 1, NOW()),
-(1003, '王芳', '$2a$10$OyXnTF90DHtmPUFvCdh9eO20hsXDu6z0H3tneWs.xGHK8ScwU4jfy', 2, '13800001003', 'wangfang@hospital.com', 4, '主任医师', '妇科肿瘤、子宫内膜异位症', '妇科微创手术专家', NULL, 30.00, 1, NOW()),
-(1004, '刘强', '$2a$10$OyXnTF90DHtmPUFvCdh9eO20hsXDu6z0H3tneWs.xGHK8ScwU4jfy', 1, '13800001004', 'liuqiang@hospital.com', 5, '副主任医师', '骨折、关节疾病、运动损伤', '骨科微创手术专家', NULL, 20.00, 1, NOW()),
-(1005, '陈静', '$2a$10$OyXnTF90DHtmPUFvCdh9eO20hsXDu6z0H3tneWs.xGHK8ScwU4jfy', 2, '13800001005', 'chenjing@hospital.com', 3, '主治医师', '儿童呼吸道疾病、儿童哮喘', '专注儿童呼吸系统疾病10年', NULL, 15.00, 1, NOW());
+(1001, '张明', '$2a$10$Ggxx3lRWbSO67dwWHRWQU.BqTp1m8of.jTHl/nJvKw5OmVF4Lc7b.', 1, '13800001001', 'zhangming@hospital.com', 1, '主任医师', '心血管疾病、高血压、冠心病', '从事内科临床工作30年，擅长心血管疾病的诊治', NULL, 30.00, 1, NOW()),
+(1002, '李华', '$2a$10$Ggxx3lRWbSO67dwWHRWQU.BqTp1m8of.jTHl/nJvKw5OmVF4Lc7b.', 2, '13800001002', 'lihua@hospital.com', 1, '副主任医师', '糖尿病、甲状腺疾病', '内分泌科专家，20年临床经验', NULL, 20.00, 1, NOW()),
+(1003, '王芳', '$2a$10$Ggxx3lRWbSO67dwWHRWQU.BqTp1m8of.jTHl/nJvKw5OmVF4Lc7b.', 2, '13800001003', 'wangfang@hospital.com', 4, '主任医师', '妇科肿瘤、子宫内膜异位症', '妇科微创手术专家', NULL, 30.00, 1, NOW()),
+(1004, '刘强', '$2a$10$Ggxx3lRWbSO67dwWHRWQU.BqTp1m8of.jTHl/nJvKw5OmVF4Lc7b.', 1, '13800001004', 'liuqiang@hospital.com', 5, '副主任医师', '骨折、关节疾病、运动损伤', '骨科微创手术专家', NULL, 20.00, 1, NOW()),
+(1005, '陈静', '$2a$10$Ggxx3lRWbSO67dwWHRWQU.BqTp1m8of.jTHl/nJvKw5OmVF4Lc7b.', 2, '13800001005', 'chenjing@hospital.com', 3, '主治医师', '儿童呼吸道疾病、儿童哮喘', '专注儿童呼吸系统疾病10年', NULL, 15.00, 1, NOW());
 
 -- =============================================
 -- 4. 患者表 (改造自学生用户)
