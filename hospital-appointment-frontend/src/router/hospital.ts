@@ -1,4 +1,3 @@
-// 医院预约系统路由配置
 import HospitalHome from '@/views/hospital/HospitalHome.vue'
 import DoctorList from '@/views/hospital/DoctorList.vue'
 import DoctorSchedule from '@/views/hospital/DoctorSchedule.vue'
@@ -39,6 +38,30 @@ export const hospitalRoutes = [
     name: 'HospitalRegister',
     component: PatientRegister,
     meta: { title: '用户注册', hideLayout: true }
+  },
+  {
+    path: '/hospital/appointment/departments/:departmentId?',
+    name: 'AppointmentDepartments',
+    component: DoctorList,
+    meta: { title: '预约挂号', hideLayout: true }
+  },
+  {
+    path: '/hospital/appointment/doctors',
+    name: 'AppointmentDoctors',
+    component: DoctorList,
+    meta: { title: '医生列表', hideLayout: true }
+  },
+  {
+    path: '/hospital/appointment/doctor-detail',
+    name: 'AppointmentDoctorDetail',
+    component: DoctorList,
+    meta: { title: '医生详情与号源', hideLayout: true }
+  },
+  {
+    path: '/hospital/doctor-search',
+    name: 'DoctorSearch',
+    component: DoctorList,
+    meta: { title: '医生查询', hideLayout: true }
   },
   {
     path: '/hospital/doctors/:departmentId?',

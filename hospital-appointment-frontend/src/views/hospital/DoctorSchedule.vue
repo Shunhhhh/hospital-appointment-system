@@ -230,42 +230,61 @@ onMounted(() => {
 
 <style scoped>
 .appointment-page {
+  min-height: 100vh;
+  background: #f5f8fc;
   padding: 20px;
-  max-width: 800px;
+  max-width: 1440px;
   margin: 0 auto;
 }
 
+.back-bar {
+  margin-bottom: 16px;
+}
+
+.back-bar :deep(.el-button) {
+  color: #1677ff;
+}
+
 .page-title {
-  font-size: 24px;
+  font-size: 28px;
   margin-bottom: 20px;
-  color: #333;
+  color: #111827;
+  font-weight: 700;
+}
+
+.doctor-card,
+.date-section,
+.time-section,
+.complaint-section,
+.action-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(31, 41, 55, 0.06);
 }
 
 .doctor-card {
   display: flex;
   align-items: center;
   gap: 15px;
-  background: white;
   padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 16px;
 }
 
 .doctor-name {
   font-size: 20px;
-  font-weight: bold;
-  color: #333;
+  font-weight: 700;
+  color: #111827;
 }
 
 .doctor-title {
-  color: #667eea;
+  color: #1677ff;
   font-size: 14px;
   margin: 5px 0;
 }
 
 .doctor-dept {
-  color: #999;
+  color: #6b7280;
   font-size: 13px;
 }
 
@@ -275,47 +294,56 @@ onMounted(() => {
 }
 
 .fee-label {
-  color: #999;
+  color: #6b7280;
   font-size: 13px;
 }
 
 .fee-price {
-  color: #f56c6c;
+  color: #ef4444;
   font-size: 24px;
-  font-weight: bold;
+  font-weight: 700;
+}
+
+.date-section,
+.time-section,
+.complaint-section {
+  padding: 18px;
+  margin-bottom: 16px;
 }
 
 .section-title {
   font-size: 18px;
   margin-bottom: 15px;
-  color: #333;
+  color: #111827;
+  font-weight: 700;
 }
 
 .date-tabs {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   overflow-x: auto;
   padding-bottom: 10px;
 }
 
 .date-tab {
   flex-shrink: 0;
-  width: 80px;
+  width: 90px;
   padding: 15px 10px;
-  background: white;
-  border-radius: 8px;
+  background: #f8fbff;
+  border-radius: 12px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s;
-  border: 2px solid transparent;
+  transition: all 0.2s ease;
+  border: 1px solid #e5e7eb;
 }
 
 .date-tab:hover:not(.disabled) {
-  border-color: #667eea;
+  border-color: #1677ff;
+  transform: translateY(-2px);
 }
 
 .date-tab.active {
-  background: #667eea;
+  background: linear-gradient(135deg, #1677ff, #63b3ff);
   color: white;
 }
 
@@ -340,7 +368,7 @@ onMounted(() => {
 
 .date-slots {
   font-size: 11px;
-  color: #999;
+  color: #6b7280;
   margin-top: 5px;
 }
 
@@ -349,31 +377,32 @@ onMounted(() => {
 }
 
 .date-tab.active .date-slots {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .time-slots {
-  display: flex;
-  gap: 15px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .time-slot {
-  flex: 1;
   padding: 20px;
-  background: white;
-  border-radius: 8px;
+  background: #f8fbff;
+  border-radius: 12px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s;
-  border: 2px solid transparent;
+  transition: all 0.2s ease;
+  border: 1px solid #e5e7eb;
 }
 
 .time-slot:hover:not(.disabled) {
-  border-color: #667eea;
+  border-color: #1677ff;
+  transform: translateY(-2px);
 }
 
 .time-slot.selected {
-  background: #667eea;
+  background: linear-gradient(135deg, #1677ff, #63b3ff);
   color: white;
 }
 
@@ -384,7 +413,7 @@ onMounted(() => {
 
 .slot-time {
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 700;
   margin-bottom: 10px;
 }
 
@@ -395,18 +424,18 @@ onMounted(() => {
 
 .slot-remaining {
   font-size: 12px;
-  color: #667eea;
+  color: #1677ff;
   margin-bottom: 5px;
 }
 
 .slot-remaining.full {
-  color: #f56c6c;
+  color: #ef4444;
 }
 
 .slot-price {
   font-size: 16px;
-  font-weight: bold;
-  color: #f56c6c;
+  font-weight: 700;
+  color: #ef4444;
 }
 
 .time-slot.selected .slot-remaining,
@@ -425,6 +454,7 @@ onMounted(() => {
 .action-section {
   margin-top: 30px;
   text-align: center;
+  padding: 18px;
 }
 
 .action-section .el-button {
@@ -433,7 +463,19 @@ onMounted(() => {
   font-size: 16px;
 }
 
-.back-bar {
-  margin-bottom: 16px;
+@media (max-width: 768px) {
+  .doctor-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .doctor-fee {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .time-slots {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

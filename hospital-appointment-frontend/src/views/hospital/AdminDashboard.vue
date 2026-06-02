@@ -477,9 +477,7 @@ onMounted(async () => {
 .admin-dashboard {
   min-height: 100vh;
   padding: 24px;
-  background:
-    radial-gradient(circle at top left, rgba(64, 158, 255, 0.12), transparent 28%),
-    linear-gradient(180deg, #f7f9fc 0%, #eef3f8 100%);
+  background: #f5f8fc;
 }
 
 .admin-header {
@@ -487,16 +485,17 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   padding: 22px 24px;
-  margin-bottom: 20px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 16px 40px rgba(17, 24, 39, 0.08);
+  margin: 0 auto 20px;
+  max-width: 1440px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 18px rgba(31, 41, 55, 0.06);
 }
 
 .eyebrow {
   margin: 0 0 6px;
-  color: #409eff;
+  color: #1677ff;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -506,12 +505,12 @@ onMounted(async () => {
 .admin-header h1 {
   margin: 0;
   font-size: 28px;
-  color: #172033;
+  color: #111827;
 }
 
 .subtitle {
   margin: 6px 0 0;
-  color: #667085;
+  color: #6b7280;
 }
 
 .admin-user {
@@ -519,28 +518,29 @@ onMounted(async () => {
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  color: #344054;
+  color: #374151;
 }
 
 .avatar {
-  background: linear-gradient(135deg, #409eff, #67c23a);
+  background: linear-gradient(135deg, #1677ff, #63b3ff);
 }
 
 .overview-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
-  margin-bottom: 20px;
+  margin: 0 auto 20px;
+  max-width: 1440px;
 }
 
 .overview-card {
-  border: none;
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(31, 41, 55, 0.06);
 }
 
 .card-title {
-  color: #667085;
+  color: #6b7280;
   font-size: 14px;
 }
 
@@ -548,20 +548,23 @@ onMounted(async () => {
   margin-top: 10px;
   font-size: 30px;
   font-weight: 700;
-  color: #101828;
+  color: #111827;
 }
 
 .card-desc {
   margin-top: 8px;
-  color: #98a2b3;
+  color: #6b7280;
   font-size: 13px;
 }
 
 .admin-tabs {
-  background: rgba(255, 255, 255, 0.92);
+  background: #ffffff;
   padding: 18px 20px 24px;
-  border-radius: 20px;
-  box-shadow: 0 16px 40px rgba(17, 24, 39, 0.06);
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 18px rgba(31, 41, 55, 0.06);
+  max-width: 1440px;
+  margin: 0 auto;
 }
 
 .pane-toolbar {
@@ -576,6 +579,11 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-end;
   margin-top: 16px;
+}
+
+:deep(.el-table) {
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 @media (max-width: 1100px) {

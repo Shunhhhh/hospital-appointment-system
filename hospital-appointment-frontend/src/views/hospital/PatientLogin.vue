@@ -147,35 +147,40 @@ const goToRegister = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(22, 119, 255, 0.16), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.12), transparent 26%),
+    #f5f8fc;
 }
 
 .login-box {
-  width: 400px;
+  width: min(440px, 100%);
   padding: 40px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 30px rgba(31, 41, 55, 0.08);
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
 .login-header h1 {
-  font-size: 24px;
-  color: #333;
+  font-size: 28px;
+  color: #111827;
   margin-bottom: 10px;
 }
 
 .login-header p {
-  color: #999;
+  color: #6b7280;
   font-size: 14px;
 }
 
 .login-tabs {
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 }
 
 .login-tabs .el-radio-group {
@@ -195,17 +200,22 @@ const goToRegister = () => {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .login-btn {
   width: 100%;
+  height: 46px;
 }
 
 .register-link {
   text-align: center;
-  color: #999;
+  color: #6b7280;
   font-size: 14px;
   margin-top: 15px;
+}
+
+:deep(.el-input__wrapper) {
+  border-radius: 10px;
 }
 </style>

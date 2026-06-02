@@ -107,19 +107,20 @@ code/
 ```sql
 mysql -u root -p
 source hospital_appointment.sql
+source hospital_extra_seed.sql
 ```
 
 ### 2. 启动后端
 
 ```bash
-cd study-room-backend
+cd hospital-appointment-system\hospital-appointment-backend
 mvn spring-boot:run
 ```
 
 ### 3. 启动前端
 
 ```bash
-cd SelfStudyRoom
+cd hospital-appointment-system\hospital-appointment-frontend
 npm install
 npm run dev
 ```
@@ -132,17 +133,23 @@ npm run dev
 
 ### 测试账号
 
-**患者账号**
-- 手机号：13900001001
-- 密码：password
+密码都为password
 
-**医生账号**
-- 手机号：13800001001
-- 密码：password
+患者账号
+张三, 13900001001
+李四, 13900001002
+王五, 13900001003
 
-**管理员账号**
-- 管理员ID：1
-- 密码：password
+医生账号
+张明, 13800001001
+李华, 13800001002
+王芳, 13800001003
+刘强, 13800001004
+陈静, 13800001005
+
+管理员账号
+系统管理员,1
+
 
 ## 概念映射
 
