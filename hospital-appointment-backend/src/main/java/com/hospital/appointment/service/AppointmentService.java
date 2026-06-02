@@ -57,17 +57,17 @@ public class AppointmentService {
             throw new IllegalArgumentException("您已被列入黑名单，无法预约");
         }
         
-        // 检查同一患者在同一时段是否已有预约（包括所有有效状态）
-        int conflict = appointmentMapper.countConflict(
-            appointment.getPatientID(), appointment.getAppointmentDate(), appointment.getTimeSlot());
-        if (conflict > 0) {
-            throw new IllegalArgumentException("您在该时段已有预约，请先取消或选择其他时段");
-        }
-        
         // 检查号源
         DoctorSchedule schedule = scheduleMapper.selectById(appointment.getScheduleID());
-        if (schedule == null || schedule.getRemainingSlots() <= 0) {
+        if (schedule == null || schedule.getRemainingSlots() <= 0 || schedule.getScheduleStatus() == null || schedule.getScheduleStatus() != 1) {
             throw new IllegalArgumentException("号源已满，请选择其他时段");
+        }
+
+        // 检查同一患者在同一时段是否已有预约（以排班真实日期/时段为准）
+        int conflict = appointmentMapper.countConflict(
+            appointment.getPatientID(), schedule.getScheduleDate(), schedule.getTimeSlot());
+        if (conflict > 0) {
+            throw new IllegalArgumentException("您在该时段已有预约，请先取消或选择其他时段");
         }
         
         // 获取医生和科室信息

@@ -159,46 +159,57 @@ const goToLogin = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(22, 119, 255, 0.16), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.12), transparent 26%),
+    #f5f8fc;
 }
 
 .register-box {
-  width: 450px;
+  width: min(520px, 100%);
   padding: 40px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 30px rgba(31, 41, 55, 0.08);
 }
 
 .register-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
 .register-header h1 {
-  font-size: 24px;
-  color: #333;
+  font-size: 28px;
+  color: #111827;
   margin-bottom: 10px;
 }
 
 .register-header p {
-  color: #999;
+  color: #6b7280;
   font-size: 14px;
 }
 
 .register-btn {
   width: 100%;
+  height: 46px;
 }
 
 .login-link {
   text-align: center;
-  color: #999;
+  color: #6b7280;
   font-size: 14px;
   margin-top: 20px;
 }
 
 .back-bar {
   margin-bottom: 16px;
+}
+
+:deep(.el-input__wrapper),
+:deep(.el-textarea__inner),
+:deep(.el-select__wrapper) {
+  border-radius: 10px;
 }
 </style>
