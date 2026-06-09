@@ -1,84 +1,7 @@
 ﻿<template>
   <div class="hospital-home-page">
-    <header class="top-header">
-      <div class="brand">
-        <div class="brand-logo">宁大</div>
-        <div class="brand-text">
-          <div class="brand-title">宁波大学附属第一医院预约挂号系统</div>
-          <div class="brand-subtitle">Hospital Appointment Portal</div>
-        </div>
-      </div>
-
-      <nav class="top-nav" aria-label="顶部导航">
-        <button
-          v-for="item in topMenus"
-          :key="item.label"
-          type="button"
-          class="top-nav-item"
-          :class="{ active: item.label === '首页' }"
-          @click="handleTopMenuClick(item.path)"
-        >
-          {{ item.label }}
-        </button>
-      </nav>
-
-      <div class="header-tools">
-        <el-input
-          v-model="searchKeyword"
-          class="search-input"
-          placeholder="搜索科室、医生、疾病"
-          clearable
-          @keyup.enter="performSearch"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
-
-        <el-badge :value="3" class="notification-badge">
-          <el-button circle class="icon-button" @click="router.push('/hospital/my-appointments')">
-            <el-icon><Bell /></el-icon>
-          </el-button>
-        </el-badge>
-
-        <el-dropdown trigger="click">
-          <div class="user-area">
-            <el-avatar :size="36" class="user-avatar">{{ userName.slice(0, 1) }}</el-avatar>
-            <div class="user-meta">
-              <div class="user-name">{{ userName }}</div>
-              <div class="user-role">{{ userTypeLabel }}</div>
-            </div>
-            <el-icon class="user-arrow"><ArrowDown /></el-icon>
-          </div>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="router.push('/hospital/profile')">个人中心</el-dropdown-item>
-              <el-dropdown-item @click="router.push('/hospital/my-appointments')">我的预约</el-dropdown-item>
-              <el-dropdown-item @click="router.push('/hospital/login')">切换账号</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
-    </header>
-
     <div class="page-shell">
-      <aside class="side-bar">
-        <div class="side-panel">
-          <div class="side-title">快捷导航</div>
-          <div
-            v-for="item in sidebarMenus"
-            :key="item.label"
-            class="side-item"
-            :class="{ active: item.label === '首页' }"
-            @click="handleTopMenuClick(item.path)"
-          >
-            <el-icon class="side-icon">
-              <component :is="item.icon" />
-            </el-icon>
-            <span>{{ item.label }}</span>
-          </div>
-        </div>
-      </aside>
+      <SidebarNav />
 
       <main class="main-area">
         <section class="banner-card">
@@ -91,12 +14,6 @@
             <div class="banner-actions">
               <el-button type="primary" size="large" @click="router.push('/hospital/appointment/departments')">立即预约挂号</el-button>
               <el-button size="large" plain @click="router.push('/hospital/my-appointments')">查看预约记录</el-button>
-            </div>
-            <div class="banner-stats">
-              <div v-for="stat in bannerStats" :key="stat.label" class="stat-item">
-                <div class="stat-value">{{ stat.value }}</div>
-                <div class="stat-label">{{ stat.label }}</div>
-              </div>
             </div>
           </div>
 
@@ -237,8 +154,9 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import SidebarNav from '@/components/hospital/SidebarNav.vue'
 import {
   ArrowDown,
   ArrowRight,
@@ -307,6 +225,7 @@ type NoticeItem = {
 }
 
 const router = useRouter()
+const route = useRoute()
 const searchKeyword = ref('')
 
 const topMenus: MenuItem[] = [
@@ -316,25 +235,6 @@ const topMenus: MenuItem[] = [
   { label: '检查检验', path: '/hospital/my-appointments' },
   { label: '住院服务', path: '/hospital/profile' },
   { label: '健康宣教', path: '/hospital/profile' }
-]
-
-const sidebarMenus = [
-  { label: '首页', path: '/hospital/home', icon: House },
-  { label: '预约挂号', path: '/hospital/appointment/departments', icon: Calendar },
-  { label: '科室查询', path: '/hospital/appointment/departments', icon: OfficeBuilding },
-  { label: '医生查询', path: '/hospital/doctor-search', icon: FirstAidKit },
-  { label: '我的预约', path: '/hospital/my-appointments', icon: Tickets },
-  { label: '检查报告', path: '/hospital/my-appointments', icon: DataAnalysis },
-  { label: '门诊记录', path: '/hospital/profile', icon: Memo },
-  { label: '住院助手', path: '/hospital/profile', icon: Suitcase },
-  { label: '个人中心', path: '/hospital/profile', icon: User }
-]
-
-const bannerStats = [
-  { label: '在线医生', value: '120+' },
-  { label: '热门科室', value: '18' },
-  { label: '本周预约', value: '2,840' },
-  { label: '平均响应', value: '8 分钟' }
 ]
 
 const departments: DepartmentCard[] = [
@@ -368,23 +268,15 @@ const notices: NoticeItem[] = [
 ]
 
 const quickServices = [
+  { title: '智能预问诊', desc: 'AI 分析症状建议', icon: ChatLineRound, path: '/hospital/pre-diagnosis' },
   { title: '预约挂号', desc: '快速选择科室与医生', icon: Calendar, path: '/hospital/appointment/departments' },
   { title: '找医生', desc: '按专长筛选专家', icon: FirstAidKit, path: '/hospital/doctor-search' },
-  { title: '检查检验报告', desc: '查看化验和检查结果', icon: DataAnalysis, path: '/hospital/my-appointments' },
-  { title: '住院助手', desc: '住院流程与注意事项', icon: Suitcase, path: '/hospital/profile' }
+  { title: '检查检验报告', desc: '查看化验和检查结果', icon: DataAnalysis, path: '/hospital/reports' },
 ]
 
 const commonServices = [
   { title: '排队助手', desc: '实时查看排队进度', icon: Clock, path: '/hospital/my-appointments' },
   { title: '门诊记录', desc: '快速查阅历史记录', icon: Memo, path: '/hospital/profile' },
-  { title: '病历复印', desc: '在线申请材料复印', icon: Files, path: '/hospital/profile' },
-  { title: '体检报告', desc: '查看体检结论与建议', icon: DataAnalysis, path: '/hospital/my-appointments' },
-  { title: '病假单', desc: '便捷发起证明申请', icon: Postcard, path: '/hospital/profile' },
-  { title: '智能导诊', desc: '按症状推荐科室', icon: Guide, path: '/hospital/appointment/departments' },
-  { title: '新生儿报告', desc: '新生儿检查结果查询', icon: Document, path: '/hospital/my-appointments' },
-  { title: '智慧停车', desc: '停车引导与缴费', icon: Van, path: '/hospital/profile' },
-  { title: '院内导航', desc: '快速找到门诊区域', icon: Location, path: '/hospital/profile' },
-  { title: '体检预约', desc: '套餐与时间一键预约', icon: Calendar, path: '/hospital/appointment/departments' },
   { title: '意见反馈', desc: '提交改进建议', icon: EditPen, path: '/hospital/profile' },
   { title: '健康宣教', desc: '查看健康科普内容', icon: Reading, path: '/hospital/profile' }
 ]
@@ -451,6 +343,11 @@ const goToSchedule = (doctorId: number) => {
 
 const handleQuickAction = (path: string) => {
   router.push(path)
+}
+
+const handleLogout = () => {
+  localStorage.removeItem('hospital_user')
+  router.push('/hospital/login')
 }
 
 const performSearch = () => {

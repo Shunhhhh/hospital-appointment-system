@@ -105,6 +105,8 @@ public class AppointmentService {
      */
     public List<Appointment> getAppointmentsByPatient(Long patientId, Integer status) {
         expireTimeoutAppointments();
+        // 清理昨天及之前的遗留未完成记录
+        expireUnfinishedByDate(LocalDate.now().minusDays(1));
         return appointmentMapper.selectByPatient(patientId, status);
     }
     
@@ -113,6 +115,7 @@ public class AppointmentService {
      */
     public List<Appointment> getAppointmentsByDoctor(Long doctorId, Integer status) {
         expireTimeoutAppointments();
+        expireUnfinishedByDate(LocalDate.now().minusDays(1));
         return appointmentMapper.selectByDoctor(doctorId, status);
     }
     
@@ -214,6 +217,32 @@ public class AppointmentService {
             appointmentMapper.update(apt);
             // 释放号源
             scheduleMapper.incrementSlots(apt.getScheduleID());
+        }
+    }
+
+    /**
+     * 定时任务：每天23:30将所有未完成的预约（已预约/已签到/就诊中）标记为过期
+     */
+    @Scheduled(cron = "0 30 23 * * ?")
+    @Transactional
+    public void expireUnfinishedAppointments() {
+        expireUnfinishedByDate(LocalDate.now());
+    }
+    
+    /**
+     * 清理指定日期之前所有遗留的未完成预约
+     */
+    @Transactional
+    public void expireUnfinishedByDate(LocalDate beforeDate) {
+        List<Appointment> unfinished = appointmentMapper.selectUnfinishedBefore(beforeDate);
+        if (unfinished == null || unfinished.isEmpty()) return;
+        for (Appointment apt : unfinished) {
+            int oldStatus = apt.getAppointmentStatus();
+            apt.setAppointmentStatus(8); // 已过期
+            appointmentMapper.update(apt);
+            if (oldStatus == 1) {
+                scheduleMapper.incrementSlots(apt.getScheduleID());
+            }
         }
     }
     

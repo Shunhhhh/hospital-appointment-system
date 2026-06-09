@@ -8,6 +8,8 @@ import DoctorWorkbench from '@/views/hospital/DoctorWorkbench.vue'
 import AdminDashboard from '@/views/hospital/AdminDashboard.vue'
 import ReviewForm from '@/views/hospital/ReviewForm.vue'
 import PatientProfile from '@/views/hospital/PatientProfile.vue'
+import PreDiagnosis from '@/views/hospital/PreDiagnosis.vue'
+import CheckReports from '@/views/hospital/CheckReports.vue'
 
 export const hospitalRoutes = [
   {
@@ -104,5 +106,17 @@ export const hospitalRoutes = [
     name: 'PatientProfile',
     component: PatientProfile,
     meta: { title: '个人信息', hideLayout: true }
+  },
+  {
+    path: '/hospital/reports',
+    name: 'CheckReports',
+    component: CheckReports,
+    meta: { title: '检查报告', hideLayout: true }
+  },
+  {
+    path: '/hospital/pre-diagnosis',
+    name: 'PreDiagnosis',
+    component: PreDiagnosis,
+    meta: { title: '智能预问诊', hideLayout: true }
   }
 ]

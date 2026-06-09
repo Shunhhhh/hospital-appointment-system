@@ -90,6 +90,12 @@ public interface AppointmentMapper {
 
     @Select("SELECT a.* FROM appointment a WHERE a.appointmentDate = #{date} AND a.appointmentStatus = 1 ORDER BY a.appointmentNumber ASC")
     List<Appointment> selectTodayAppointments(@Param("date") LocalDate date);
+
+    @Select("SELECT a.* FROM appointment a WHERE a.appointmentDate = #{date} AND a.appointmentStatus IN (1,2,3) ORDER BY a.appointmentNumber ASC")
+    List<Appointment> selectUnfinishedToday(@Param("date") LocalDate date);
+
+    @Select("SELECT a.* FROM appointment a WHERE a.appointmentDate < #{date} AND a.appointmentStatus IN (1,2,3)")
+    List<Appointment> selectUnfinishedBefore(@Param("date") LocalDate date);
     
     @Select("SELECT COUNT(*) FROM appointment WHERE doctorID = #{doctorId} AND appointmentDate = #{date}")
     long countByDoctorAndDate(@Param("doctorId") Long doctorId, @Param("date") LocalDate date);

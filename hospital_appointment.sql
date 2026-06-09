@@ -568,4 +568,37 @@ CREATE TABLE `operation_log` (
   INDEX `idx_module`(`operationModule` ASC) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志表' ROW_FORMAT = Dynamic;
 
+-- =============================================
+-- 17. 检查报告表
+-- =============================================
+DROP TABLE IF EXISTS `check_report`;
+CREATE TABLE `check_report` (
+  `reportID` bigint NOT NULL AUTO_INCREMENT COMMENT '报告ID',
+  `patientID` bigint NOT NULL COMMENT '患者ID',
+  `doctorID` bigint NOT NULL COMMENT '医生ID',
+  `departmentID` bigint NOT NULL COMMENT '科室ID',
+  `appointmentID` varchar(36) NULL COMMENT '关联挂号ID',
+  `reportName` varchar(100) NOT NULL COMMENT '报告名称',
+  `reportType` varchar(20) NOT NULL COMMENT '报告类型：lab-化验 image-影像 physical-体检',
+  `reportContent` text NULL COMMENT '检查结果',
+  `doctorAdvice` text NULL COMMENT '医生建议',
+  `reportStatus` tinyint NOT NULL DEFAULT 1 COMMENT '状态：1-处理中 2-已完成',
+  `checkDate` date NULL COMMENT '检查日期',
+  `createTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`reportID`),
+  INDEX `idx_patient`(`patientID`),
+  INDEX `idx_doctor`(`doctorID`),
+  INDEX `idx_type`(`reportType`),
+  INDEX `idx_date`(`checkDate`),
+  CONSTRAINT `fk_report_patient` FOREIGN KEY (`patientID`) REFERENCES `patient` (`patientID`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_report_doctor` FOREIGN KEY (`doctorID`) REFERENCES `doctor` (`doctorID`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_report_department` FOREIGN KEY (`departmentID`) REFERENCES `department` (`departmentID`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '检查报告表' ROW_FORMAT = Dynamic;
+
+INSERT INTO `check_report` (`patientID`, `doctorID`, `departmentID`, `reportName`, `reportType`, `reportContent`, `doctorAdvice`, `reportStatus`, `checkDate`) VALUES
+(2001, 1001, 1, '血常规', 'lab', '白细胞计数正常，红细胞计数正常，血红蛋白浓度正常，血小板计数正常。', '建议保持健康饮食和作息，定期复查。', 2, CURDATE()),
+(2001, 1001, 1, '肝功能全套', 'lab', 'ALT 35 U/L，AST 28 U/L，GGT 45 U/L，总胆红素 12.5 μmol/L。', '继续保持健康生活习惯，避免过度饮酒。', 2, DATE_ADD(CURDATE(), INTERVAL -2 DAY)),
+(2001, 1002, 2, '胸部CT', 'image', '双肺纹理清晰，未见明显实质性病变。', '无特殊处理，如有不适随诊。', 2, DATE_ADD(CURDATE(), INTERVAL -5 DAY)),
+(2001, 1001, 1, '心电图', 'lab', '待出具', '待出具', 1, CURDATE());
+
 SET FOREIGN_KEY_CHECKS = 1;
