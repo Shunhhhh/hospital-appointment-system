@@ -315,7 +315,7 @@ const topMenus: MenuItem[] = [
   { label: '找医生', path: '/hospital/doctor-search' },
   { label: '检查检验', path: '/hospital/my-appointments' },
   { label: '住院服务', path: '/hospital/profile' },
-  { label: '健康宣教', path: '/hospital/profile' }
+  { label: '健康宣教', path: '/hospital/health-education' }
 ]
 
 const sidebarMenus = [
@@ -385,8 +385,8 @@ const commonServices = [
   { title: '智慧停车', desc: '停车引导与缴费', icon: Van, path: '/hospital/profile' },
   { title: '院内导航', desc: '快速找到门诊区域', icon: Location, path: '/hospital/profile' },
   { title: '体检预约', desc: '套餐与时间一键预约', icon: Calendar, path: '/hospital/appointment/departments' },
-  { title: '意见反馈', desc: '提交改进建议', icon: EditPen, path: '/hospital/profile' },
-  { title: '健康宣教', desc: '查看健康科普内容', icon: Reading, path: '/hospital/profile' }
+  { title: '意见反馈', desc: '提交反馈工单', icon: EditPen, path: '/hospital/feedback' },
+  { title: '健康宣传', desc: '按科室查看健康科普', icon: Reading, path: '/hospital/health-education' }
 ]
 
 const currentUser = computed(() => {

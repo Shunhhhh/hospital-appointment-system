@@ -8,6 +8,9 @@ import DoctorWorkbench from '@/views/hospital/DoctorWorkbench.vue'
 import AdminDashboard from '@/views/hospital/AdminDashboard.vue'
 import ReviewForm from '@/views/hospital/ReviewForm.vue'
 import PatientProfile from '@/views/hospital/PatientProfile.vue'
+import PatientFeedback from '@/views/hospital/PatientFeedback.vue'
+import PatientFeedbackSubmit from '@/views/hospital/PatientFeedbackSubmit.vue'
+import PatientHealthEducation from '@/views/hospital/PatientHealthEducation.vue'
 
 export const hospitalRoutes = [
   {
@@ -104,5 +107,23 @@ export const hospitalRoutes = [
     name: 'PatientProfile',
     component: PatientProfile,
     meta: { title: '个人信息', hideLayout: true }
+  },
+  {
+    path: '/hospital/feedback',
+    name: 'PatientFeedback',
+    component: PatientFeedback,
+    meta: { title: '意见反馈', hideLayout: true }
+  },
+  {
+    path: '/hospital/feedback/submit',
+    name: 'PatientFeedbackSubmit',
+    component: PatientFeedbackSubmit,
+    meta: { title: '提交工单', hideLayout: true }
+  },
+  {
+    path: '/hospital/health-education',
+    name: 'PatientHealthEducation',
+    component: PatientHealthEducation,
+    meta: { title: '健康宣传', hideLayout: true }
   }
 ]
