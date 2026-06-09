@@ -7,6 +7,27 @@
 USE hospital_appointment;
 SET NAMES utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `feedback` (
+  `feedbackID` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '反馈编号',
+  `studentID` bigint NOT NULL COMMENT '患者ID',
+  `processAdminID` bigint NULL DEFAULT NULL COMMENT '处理管理员ID',
+  `feedbackType` tinyint NOT NULL COMMENT '反馈类型：1-积分 2-挂号 3-报告查询 4-问诊',
+  `feedbackContent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '反馈内容',
+  `processStatus` tinyint NOT NULL DEFAULT 1 COMMENT '处理状态：1-待处理 2-处理中 3-已回复 4-已关闭',
+  `feedbackTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '反馈时间',
+  `replyContent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '回复内容',
+  `replyTime` datetime NULL DEFAULT NULL COMMENT '回复时间',
+  `contactInfo` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '联系方式',
+  `relatedResourceID` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '关联资源ID',
+  `priority` tinyint NOT NULL DEFAULT 2 COMMENT '优先级：1-低 2-中 3-高',
+  PRIMARY KEY (`feedbackID`) USING BTREE,
+  UNIQUE INDEX `uk_feedback_id`(`feedbackID` ASC) USING BTREE,
+  INDEX `idx_feedback_student`(`studentID` ASC) USING BTREE,
+  INDEX `idx_feedback_status`(`processStatus` ASC) USING BTREE,
+  INDEX `idx_feedback_time`(`feedbackTime` ASC) USING BTREE,
+  INDEX `idx_feedback_admin`(`processAdminID` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT = '反馈表' ROW_FORMAT = Dynamic;
+
 INSERT INTO `department`
 (`departmentID`, `departmentName`, `departmentType`, `departmentLocation`, `departmentDesc`, `departmentIcon`, `departmentStatus`, `displayOrder`, `createTime`)
 VALUES
