@@ -4,6 +4,7 @@ import com.hospital.appointment.entity.DoctorSchedule;
 import com.hospital.appointment.service.ScheduleService;
 import com.hospital.appointment.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -43,7 +44,7 @@ public class ScheduleController {
      * 获取指定日期的排班
      */
     @GetMapping("/date/{date}")
-    public Result<List<DoctorSchedule>> getScheduleByDate(@PathVariable LocalDate date) {
+    public Result<List<DoctorSchedule>> getScheduleByDate(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         List<DoctorSchedule> list = scheduleService.getScheduleByDate(date);
         return Result.success(list);
     }
@@ -53,8 +54,8 @@ public class ScheduleController {
      */
     @GetMapping("/department/{departmentId}")
     public Result<List<DoctorSchedule>> getScheduleByDepartment(@PathVariable Long departmentId,
-                                                                @RequestParam(required = false) LocalDate startDate,
-                                                                @RequestParam(required = false) LocalDate endDate) {
+                                                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         List<DoctorSchedule> list = scheduleService.getScheduleByDepartment(departmentId, startDate, endDate);
         return Result.success(list);
     }
@@ -65,8 +66,8 @@ public class ScheduleController {
     @GetMapping("/available")
     public Result<List<DoctorSchedule>> getAvailableSchedules(@RequestParam(required = false) Long doctorId,
                                                              @RequestParam(required = false) Long departmentId,
-                                                             @RequestParam(required = false) LocalDate startDate,
-                                                             @RequestParam(required = false) LocalDate endDate) {
+                                                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         List<DoctorSchedule> list = scheduleService.getAvailableSchedules(doctorId, departmentId, startDate, endDate);
         return Result.success(list);
     }
