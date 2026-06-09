@@ -482,25 +482,47 @@ const sidebarMenus = [
 
 const campuses = ['外滩院区', '月湖院区'] as const
 const selectedCampus = ref<(typeof campuses)[number]>('外滩院区')
+const weekdayLabels = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 
-const dateOptions = [
-  { key: 'all', label: '全部日期', value: '' },
-  { key: '2026-06-02', label: '周二(今)', value: '06-02' },
-  { key: '2026-06-03', label: '周三', value: '06-03' },
-  { key: '2026-06-04', label: '周四', value: '06-04' },
-  { key: '2026-06-05', label: '周五', value: '06-05' },
-  { key: '2026-06-06', label: '周六', value: '06-06' },
-  { key: '2026-06-07', label: '周日', value: '06-07' }
-]
+const toDateKey = (date: Date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
-const selectedDateKey = ref('2026-06-02')
+const toMonthDay = (date: Date) => {
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${month}-${day}`
+}
+
+const buildDateOptions = () => {
+  const today = new Date()
+  const options = [{ key: 'all', label: '全部日期', value: '' }]
+  for (let index = 0; index < 6; index += 1) {
+    const date = new Date(today)
+    date.setDate(today.getDate() + index)
+    options.push({
+      key: toDateKey(date),
+      label: `${weekdayLabels[date.getDay()]}${index === 0 ? '(今)' : ''}`,
+      value: toMonthDay(date)
+    })
+  }
+  return options
+}
+
+const dateOptions = computed(() => buildDateOptions())
+const todayDateKey = toDateKey(new Date())
+
+const selectedDateKey = ref(todayDateKey)
 const searchKeyword = ref('')
 const doctorSearchKeyword = ref('')
 const doctorSearchSort = ref<'default' | 'appointments' | 'available'>('default')
 const doctorSearchTitle = ref('全部')
 
 const selectedDateLabel = computed(() => {
-  const found = dateOptions.find(item => item.key === selectedDateKey.value)
+  const found = dateOptions.value.find(item => item.key === selectedDateKey.value)
   return found ? `${found.label} ${found.value}`.trim() : '全部日期'
 })
 
@@ -741,6 +763,20 @@ const schedules = reactive<ScheduleItem[]>([
   }
 ])
 
+const applyDynamicMockScheduleDates = () => {
+  const upcomingDates = buildDateOptions().filter(item => item.key !== 'all')
+  const scheduleDateIndexes = [0, 0, 1, 2, 0]
+  schedules.forEach((schedule, index) => {
+    const dateOption = upcomingDates[scheduleDateIndexes[index] ?? 0]
+    if (!dateOption) return
+    schedule.dateKey = dateOption.key
+    const weekday = dateOption.label.replace('(今)', '')
+    schedule.displayDate = `${dateOption.value.replace('-', '月')}日 ${weekday}`
+  })
+}
+
+applyDynamicMockScheduleDates()
+
 const selectedPrimaryDepartmentId = ref(departmentData[0].id)
 const selectedSubDepartmentId = ref(departmentData[0].children[0].id)
 const currentSubDepartmentName = ref(departmentData[0].children[0].name)
@@ -749,7 +785,6 @@ const availabilityFilter = ref<'全部' | '仅看可约'>('全部')
 const sortBy = ref<'default' | 'appointments' | 'rating'>('default')
 const activeDoctorId = ref<number>(101)
 
-const weekdayLabels = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 const departmentIdFallbackMap: Record<string, string> = {
   '3': 'pediatrics',
   '11': 'cardio-internal',
@@ -794,6 +829,12 @@ const formatScheduleDate = (dateText: string) => {
   return `${month}月${day}日 ${weekdayLabels[date.getDay()]}`
 }
 
+const getDateKeyAfter = (offset: number) => {
+  const date = new Date()
+  date.setDate(date.getDate() + offset)
+  return toDateKey(date)
+}
+
 const mapRegistrationType = (type: number) => {
   if (type === 2) return '专家门诊'
   if (type === 3) return '特需门诊'
@@ -809,33 +850,42 @@ const resolveDoctorBookingStatus = (doctorId: number): DoctorItem['bookingStatus
 }
 
 const loadBackendAppointmentData = async () => {
-  try {
-    const [departmentRes, doctorRes, scheduleRes] = await Promise.all([
-      departmentAPI.getList(),
-      doctorAPI.getList(),
-      scheduleAPI.getAll()
-    ])
+  let loadedAnyBackendData = false
 
-    if (departmentRes.code === 200 && departmentRes.data?.length) {
-      const mappedDepartments = departmentRes.data
-        .filter(item => item.departmentStatus === 1)
-        .map(item => ({
-          id: String(item.departmentID),
-          name: item.departmentName,
-          children: [{ id: String(item.departmentID), name: item.departmentName }]
-        }))
-      departmentData.splice(0, departmentData.length, ...mappedDepartments)
-      selectedPrimaryDepartmentId.value = departmentData[0]?.id || ''
-      selectedSubDepartmentId.value = departmentData[0]?.children[0]?.id || ''
-      currentSubDepartmentName.value = departmentData[0]?.children[0]?.name || ''
-    }
+  const [departmentResult, doctorResult, scheduleResult] = await Promise.allSettled([
+    departmentAPI.getList(),
+    doctorAPI.getList(),
+    scheduleAPI.getAvailable({})
+  ])
 
-    const departmentCampus = new Map(
-      (departmentRes.data || []).map(item => [item.departmentID, getCampusByLocation(item.departmentLocation)])
-    )
+  const departmentRes = departmentResult.status === 'fulfilled' ? departmentResult.value : null
+  const doctorRes = doctorResult.status === 'fulfilled' ? doctorResult.value : null
+  const scheduleRes = scheduleResult.status === 'fulfilled' ? scheduleResult.value : null
 
-    if (scheduleRes.code === 200 && scheduleRes.data?.length) {
-      const mappedSchedules = scheduleRes.data.map(item => ({
+  if (departmentRes?.code === 200 && departmentRes.data?.length) {
+    const mappedDepartments = departmentRes.data
+      .filter(item => item.departmentStatus === 1)
+      .map(item => ({
+        id: String(item.departmentID),
+        name: item.departmentName,
+        children: [{ id: String(item.departmentID), name: item.departmentName }]
+      }))
+    departmentData.splice(0, departmentData.length, ...mappedDepartments)
+    selectedPrimaryDepartmentId.value = departmentData[0]?.id || ''
+    selectedSubDepartmentId.value = departmentData[0]?.children[0]?.id || ''
+    currentSubDepartmentName.value = departmentData[0]?.children[0]?.name || ''
+    loadedAnyBackendData = true
+  }
+
+  const departmentCampus = new Map(
+    (departmentRes?.data || []).map(item => [item.departmentID, getCampusByLocation(item.departmentLocation)])
+  )
+
+  if (scheduleRes?.code === 200 && scheduleRes.data?.length) {
+    const endDateKey = getDateKeyAfter(13)
+    const mappedSchedules = scheduleRes.data
+      .filter(item => item.scheduleDate >= todayDateKey && item.scheduleDate <= endDateKey)
+      .map(item => ({
         id: item.scheduleID,
         doctorId: item.doctorID,
         campus: departmentCampus.get(item.departmentID || 0) || '外滩院区',
@@ -848,34 +898,37 @@ const loadBackendAppointmentData = async () => {
         registrationType: mapRegistrationType(item.registrationType),
         fee: Number(item.price || 0)
       }))
-      schedules.splice(0, schedules.length, ...mappedSchedules)
-    }
+    schedules.splice(0, schedules.length, ...mappedSchedules)
+    loadedAnyBackendData = true
+  }
 
-    if (doctorRes.code === 200 && doctorRes.data?.length) {
-      const mappedDoctors = doctorRes.data
-        .filter(item => item.doctorStatus === 1)
-        .map(item => ({
-          id: item.doctorID,
-          subDepartmentId: String(item.departmentID),
-          campus: departmentCampus.get(item.departmentID) || '外滩院区',
-          name: item.doctorName,
-          avatar: item.doctorPhoto || '',
-          title: item.title,
-          department: item.departmentName || '门诊科室',
-          specialty: item.specialty || '擅长常见病、多发病诊疗和慢病随访管理。',
-          introduction: item.doctorIntro || item.specialty || '暂无简介',
-          goodRate: '100%',
-          annualAppointments: 600 + (item.doctorID % 1000) * 17,
-          bookingStatus: resolveDoctorBookingStatus(item.doctorID)
-        }))
-      doctors.splice(0, doctors.length, ...mappedDoctors)
-      if (!doctors.find(item => item.id === activeDoctorId.value)) {
-        activeDoctorId.value = doctors[0]?.id || 0
-      }
+  if (doctorRes?.code === 200 && doctorRes.data?.length) {
+    const mappedDoctors = doctorRes.data
+      .filter(item => item.doctorStatus === 1)
+      .map(item => ({
+        id: item.doctorID,
+        subDepartmentId: String(item.departmentID),
+        campus: departmentCampus.get(item.departmentID) || '外滩院区',
+        name: item.doctorName,
+        avatar: item.doctorPhoto || '',
+        title: item.title,
+        department: item.departmentName || '门诊科室',
+        specialty: item.specialty || '擅长常见病、多发病诊疗和慢病随访管理。',
+        introduction: item.doctorIntro || item.specialty || '暂无简介',
+        goodRate: '100%',
+        annualAppointments: 600 + (item.doctorID % 1000) * 17,
+        bookingStatus: resolveDoctorBookingStatus(item.doctorID)
+      }))
+    doctors.splice(0, doctors.length, ...mappedDoctors)
+    if (!doctors.find(item => item.id === activeDoctorId.value)) {
+      activeDoctorId.value = doctors[0]?.id || 0
     }
+    loadedAnyBackendData = true
+  }
 
-    syncStateWithRoute()
-  } catch (error) {
+  syncStateWithRoute()
+
+  if (!loadedAnyBackendData) {
     ElMessage.warning('后端科室医生数据加载失败，已使用页面内置数据')
   }
 }
@@ -981,7 +1034,8 @@ const syncStateWithRoute = () => {
     selectedCampus.value = q.campus as (typeof campuses)[number]
   }
   if (typeof q.date === 'string') {
-    selectedDateKey.value = q.date
+    const validDateKeys = dateOptions.value.map(item => item.key)
+    selectedDateKey.value = validDateKeys.includes(q.date) ? q.date : todayDateKey
   }
   if (primaryFromRoute) {
     selectedPrimaryDepartmentId.value = primaryFromRoute
