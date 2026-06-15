@@ -1,10 +1,12 @@
 <template>
-  <div class="my-appointments">
+  <div class="appointments-page">
+    <div class="page-shell">
+      <SidebarNav />
+      <main class="main-area">
     <section class="appointments-head">
       <div>
-        <el-button text class="back-button" @click="router.push('/hospital/home')">← 返回首页</el-button>
         <div class="title-line">
-          <h1 class="page-title">我的挂号</h1>
+          <h1 class="page-title">我的预约</h1>
           <span class="head-note">查看待就诊、签到、完成与失效记录</span>
         </div>
       </div>
@@ -114,6 +116,8 @@
     <el-empty v-if="!loading && appointments.length === 0" description="暂无挂号记录">
       <el-button type="primary" @click="$router.push('/hospital/home')">去预约</el-button>
     </el-empty>
+      </main>
+    </div>
   </div>
 </template>
 
@@ -121,6 +125,7 @@
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import SidebarNav from '@/components/hospital/SidebarNav.vue'
 import { appointmentAPI } from '@/api/hospital/appointment'
 import type { Appointment } from '@/api/hospital/appointment'
 
@@ -135,6 +140,8 @@ const statusOptions = [
   { label: '已签到', value: '2' },
   { label: '已完成', value: '4' },
   { label: '已取消', value: '5' },
+  { label: '已爽约', value: '7' },
+  { label: '已过期', value: '8' },
   { label: '已失效', value: '8' }
 ]
 
@@ -277,6 +284,19 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.appointments-page {
+  min-height: 100vh;
+  background: #f5f8fc;
+  color: #1f2937;
+}
+
+.page-shell {
+  max-width: 1440px; margin: 0 auto; padding: 16px;
+  display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 16px;
+}
+
+.main-area { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+
 .my-appointments {
   min-height: 100vh;
   background: #f5f8fc;
@@ -537,6 +557,10 @@ onMounted(() => {
 }
 
 @media (max-width: 1180px) {
+  .page-shell {
+    grid-template-columns: 1fr;
+  }
+
   .card-main {
     grid-template-columns: 1fr;
     align-items: stretch;

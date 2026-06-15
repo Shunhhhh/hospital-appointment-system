@@ -11,6 +11,8 @@ import PatientProfile from '@/views/hospital/PatientProfile.vue'
 import PatientFeedback from '@/views/hospital/PatientFeedback.vue'
 import PatientFeedbackSubmit from '@/views/hospital/PatientFeedbackSubmit.vue'
 import PatientHealthEducation from '@/views/hospital/PatientHealthEducation.vue'
+import PreDiagnosis from '@/views/hospital/PreDiagnosis.vue'
+import CheckReports from '@/views/hospital/CheckReports.vue'
 
 export const hospitalRoutes = [
   {
@@ -125,5 +127,17 @@ export const hospitalRoutes = [
     name: 'PatientHealthEducation',
     component: PatientHealthEducation,
     meta: { title: '健康宣传', hideLayout: true }
+  },
+  {
+    path: '/hospital/reports',
+    name: 'CheckReports',
+    component: CheckReports,
+    meta: { title: '检查报告', hideLayout: true }
+  },
+  {
+    path: '/hospital/pre-diagnosis',
+    name: 'PreDiagnosis',
+    component: PreDiagnosis,
+    meta: { title: '智能预问诊', hideLayout: true }
   }
 ]

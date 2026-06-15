@@ -1,77 +1,7 @@
 ﻿<template>
   <div class="appointment-workbench">
-    <header class="top-header">
-      <div class="brand">
-        <div class="brand-logo">宁大</div>
-        <div class="brand-text">
-          <div class="brand-title">宁波大学附属第一医院预约挂号系统</div>
-          <div class="brand-subtitle">Hospital Appointment Portal</div>
-        </div>
-      </div>
-
-      <nav class="top-nav" aria-label="顶部导航">
-        <button
-          v-for="item in topMenus"
-          :key="item.label"
-          type="button"
-          class="top-nav-item"
-          :class="{ active: isMenuActive(item.path) }"
-          @click="handleTopMenuClick(item.path)"
-        >
-          {{ item.label }}
-        </button>
-      </nav>
-
-      <div class="header-tools">
-        <el-input
-          v-model="searchKeyword"
-          class="search-input"
-          placeholder="搜索挂号科室、医生"
-          clearable
-          @keyup.enter="performSearch"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
-
-        <el-dropdown trigger="click">
-          <div class="user-area">
-            <el-avatar :size="36" class="user-avatar">{{ userName.slice(0, 1) }}</el-avatar>
-            <div class="user-meta">
-              <div class="user-name">{{ userName }}</div>
-              <div class="user-role">患者</div>
-            </div>
-            <el-icon class="user-arrow"><ArrowDown /></el-icon>
-          </div>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="router.push('/hospital/profile')">个人中心</el-dropdown-item>
-              <el-dropdown-item @click="router.push('/hospital/my-appointments')">我的预约</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
-    </header>
-
     <div class="page-shell">
-      <aside class="side-bar">
-        <div class="side-panel">
-          <div class="side-title">快捷导航</div>
-          <div
-            v-for="item in sidebarMenus"
-            :key="item.label"
-            class="side-item"
-            :class="{ active: isMenuActive(item.path) }"
-            @click="handleTopMenuClick(item.path)"
-          >
-            <el-icon class="side-icon">
-              <component :is="item.icon" />
-            </el-icon>
-            <span>{{ item.label }}</span>
-          </div>
-        </div>
-      </aside>
+      <SidebarNav />
 
       <main class="main-area">
         <div class="page-head card-base">
@@ -85,16 +15,12 @@
             </div>
           </div>
           <div v-if="currentStep !== 'doctorSearch'" class="page-head-tags">
-            <span class="page-tag">{{ selectedCampus }}</span>
             <span class="page-tag active">{{ selectedDateLabel }}</span>
           </div>
         </div>
 
         <section v-if="currentStep !== 'doctorSearch'" class="filter-card card-base">
           <div class="filter-row">
-            <el-select v-model="selectedCampus" placeholder="选择院区" class="campus-select">
-              <el-option v-for="campus in campuses" :key="campus" :label="campus" :value="campus" />
-            </el-select>
             <el-input
               v-model="searchKeyword"
               class="service-search"
@@ -227,7 +153,7 @@
             <div class="doctor-list-head card-base">
               <el-button text class="back-button" @click="goDepartmentStep">← 返回科室选择</el-button>
               <div class="doctor-list-title-row">
-                <h2 class="doctor-list-title">{{ currentSubDepartmentName }}（{{ selectedCampus }}）</h2>
+                <h2 class="doctor-list-title">{{ currentSubDepartmentName }}</h2>
                 <el-tag type="info" effect="plain">12周岁及以上</el-tag>
               </div>
             </div>
@@ -355,9 +281,8 @@
                   <h3>号源预约</h3>
                   <p>选择院区与时段完成挂号</p>
                 </div>
-                <el-tabs v-model="selectedCampus" class="campus-tabs">
-                  <el-tab-pane label="外滩院区" name="外滩院区" />
-                  <el-tab-pane label="月湖院区" name="月湖院区" />
+                <el-tabs class="campus-tabs">
+                  <el-tab-pane label="门诊号源" name="默认" />
                 </el-tabs>
               </div>
 
@@ -404,6 +329,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import SidebarNav from '@/components/hospital/SidebarNav.vue'
 import {
   ArrowDown,
   Calendar,
@@ -469,15 +395,6 @@ const topMenus = [
   { label: '找医生', path: '/hospital/doctor-search' },
   { label: '我的预约', path: '/hospital/my-appointments' },
   { label: '个人中心', path: '/hospital/profile' }
-]
-
-const sidebarMenus = [
-  { label: '首页', path: '/hospital/home', icon: House },
-  { label: '预约挂号', path: '/hospital/appointment/departments', icon: Calendar },
-  { label: '科室查询', path: '/hospital/appointment/departments', icon: OfficeBuilding },
-  { label: '医生查询', path: '/hospital/doctor-search', icon: FirstAidKit },
-  { label: '我的预约', path: '/hospital/my-appointments', icon: Tickets },
-  { label: '个人中心', path: '/hospital/profile', icon: User }
 ]
 
 const campuses = ['外滩院区', '月湖院区'] as const
@@ -946,18 +863,28 @@ const currentStep = computed<'department' | 'doctorList' | 'doctorDetail' | 'doc
   return 'department'
 })
 
-const primaryDepartments = computed(() => departmentData)
+const primaryDepartments = computed(() => {
+  const keyword = searchKeyword.value.trim().toLowerCase()
+  if (!keyword) return departmentData
+  return departmentData.filter(item =>
+    item.name.toLowerCase().includes(keyword) ||
+    item.children.some(sub => sub.name.toLowerCase().includes(keyword))
+  )
+})
 
 const currentSecondaryDepartments = computed(() => {
   const found = departmentData.find(item => item.id === selectedPrimaryDepartmentId.value)
-  return found ? found.children : []
+  if (!found) return []
+  const keyword = searchKeyword.value.trim().toLowerCase()
+  if (!keyword) return found.children
+  return found.children.filter(item => item.name.toLowerCase().includes(keyword))
 })
 
 const activeDoctor = computed(() => doctors.find(item => item.id === activeDoctorId.value) || doctors[0])
 
 const filteredDoctors = computed(() => {
   const keyword = searchKeyword.value.trim().toLowerCase()
-  let list = doctors.filter(item => item.subDepartmentId === selectedSubDepartmentId.value && item.campus === selectedCampus.value)
+  let list = doctors.filter(item => item.subDepartmentId === selectedSubDepartmentId.value)
 
   if (titleFilter.value !== '全部') {
     list = list.filter(item => item.title === titleFilter.value)
@@ -1010,7 +937,7 @@ const filteredDoctorSearchResults = computed(() => {
 })
 
 const visibleSchedules = computed(() => {
-  const selectedDoctorSchedules = schedules.filter(item => item.doctorId === activeDoctorId.value && item.campus === selectedCampus.value)
+  const selectedDoctorSchedules = schedules.filter(item => item.doctorId === activeDoctorId.value)
   if (selectedDateKey.value === 'all') {
     return selectedDoctorSchedules
   }
