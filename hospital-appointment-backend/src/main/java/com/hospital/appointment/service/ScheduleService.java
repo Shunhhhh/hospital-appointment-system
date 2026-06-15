@@ -25,20 +25,24 @@ public class ScheduleService {
     private DoctorMapper doctorMapper;
     
     /**
-     * 获取所有排班
+     * 获取所有排班（管理员用），没有今日排班时自动生成
      */
     public List<DoctorSchedule> getAllSchedules() {
+        // 检查今天及以后是否有排班，没有则自动生成
+        List<DoctorSchedule> futureList = scheduleMapper.selectFuture();
+        if (futureList.isEmpty()) {
+            generateAllDefaultSchedules();
+        }
         List<DoctorSchedule> list = scheduleMapper.selectAll();
-        // 动态修正过期或已约满的状态，避免前端显示过期日期仍为可预约
+        // 动态修正过期或已约满的状态
         LocalDate today = LocalDate.now();
         for (DoctorSchedule ds : list) {
             if (ds.getScheduleDate() != null) {
                 if (ds.getScheduleDate().isBefore(today)) {
-                    ds.setScheduleStatus(0); // 已过期/不可预约
+                    ds.setScheduleStatus(0);
                     continue;
                 }
             }
-            // 如果剩余号源为0，则标记为已约满
             if (ds.getRemainingSlots() == null || ds.getRemainingSlots() <= 0) {
                 ds.setScheduleStatus(2);
             }

@@ -91,23 +91,33 @@
 
       <el-tab-pane label="排班管理" name="schedule">
         <div class="pane-toolbar">
-          <el-select v-model="scheduleDoctorFilter" placeholder="按医生筛选" clearable style="width: 220px" @change="loadSchedules">
-            <el-option v-for="doctor in doctors" :key="doctor.doctorID" :label="`${doctor.doctorName}(${doctor.doctorID})`" :value="doctor.doctorID" />
-          </el-select>
-          <el-button @click="loadSchedules">刷新排班</el-button>
+          <el-date-picker v-model="scheduleDateFilter" type="date" placeholder="选择日期" clearable style="width: 160px" value-format="YYYY-MM-DD" />
+          <el-input v-model="scheduleSearch" placeholder="搜索医生或科室" clearable style="width: 220px" />
+          <el-button type="primary" @click="loadSchedules">刷新排班</el-button>
+          <el-button @click="openScheduleDialog()">新增排班</el-button>
         </div>
 
         <el-table :data="pagedSchedules" border stripe v-loading="scheduleLoading" style="width: 100%">
-          <el-table-column prop="scheduleID" label="排班ID" width="100" />
-          <el-table-column prop="doctorName" label="医生" min-width="120" />
-          <el-table-column prop="departmentName" label="科室" min-width="120" />
-          <el-table-column prop="scheduleDate" label="日期" width="120" />
-          <el-table-column prop="timeSlot" label="时段" width="90" />
-          <el-table-column prop="remainingSlots" label="剩余号源" width="100" />
-          <el-table-column prop="scheduleStatus" label="状态" width="100">
+          <el-table-column prop="scheduleDate" label="日期" width="120" sortable />
+          <el-table-column prop="timeSlot" label="时段" width="90">
             <template #default="scope">
-              <el-tag :type="scope.row.scheduleStatus === 1 ? 'success' : 'info'">
-                {{ scope.row.scheduleStatus === 1 ? '可预约' : '不可用' }}
+              {{ scope.row.timeSlot === 1 ? '上午' : scope.row.timeSlot === 2 ? '下午' : '夜诊' }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="doctorName" label="医生" min-width="100" />
+          <el-table-column prop="departmentName" label="科室" min-width="100" />
+          <el-table-column prop="remainingSlots" label="剩余/总数" width="110">
+            <template #default="scope">
+              <span :class="{ 'text-danger': scope.row.remainingSlots === 0 }">
+                {{ scope.row.remainingSlots }}/{{ scope.row.totalSlots }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="price" label="挂号费" width="90" />
+          <el-table-column prop="scheduleStatus" label="状态" width="90">
+            <template #default="scope">
+              <el-tag :type="scheduleStatusTagType(scope.row.scheduleStatus)">
+                {{ scheduleStatusText(scope.row.scheduleStatus) }}
               </el-tag>
             </template>
           </el-table-column>
@@ -128,7 +138,7 @@
             v-model:page-size="schedulePageSize"
             :page-sizes="[10, 20, 50]"
             layout="total, sizes, prev, pager, next"
-            :total="schedules.length"
+            :total="filteredSchedules.length"
           />
         </div>
       </el-tab-pane>
@@ -266,7 +276,8 @@ const departments = ref<Department[]>([])
 const doctors = ref<Doctor[]>([])
 const schedules = ref<DoctorSchedule[]>([])
 const appointments = ref<Appointment[]>([])
-const scheduleDoctorFilter = ref<number | undefined>()
+const scheduleSearch = ref('')
+const scheduleDateFilter = ref('')
 const scheduleCurrentPage = ref(1)
 const schedulePageSize = ref(10)
 
@@ -282,11 +293,6 @@ const scheduleDialogVisible = ref(false)
 const departmentForm = reactive<Partial<Department>>({})
 const doctorForm = reactive<Partial<Doctor & { doctorPassword?: string }>>({ doctorStatus: 1 })
 const scheduleForm = reactive<Partial<DoctorSchedule>>({ scheduleStatus: 1, timeSlot: 1, registrationType: 1 })
-
-const pagedSchedules = computed(() => {
-  const start = (scheduleCurrentPage.value - 1) * schedulePageSize.value
-  return schedules.value.slice(start, start + schedulePageSize.value)
-})
 
 const departmentStatusSwitch = computed({
   get: () => departmentForm.departmentStatus === 1,
@@ -331,7 +337,7 @@ const loadDoctors = async () => {
 const loadSchedules = async () => {
   scheduleLoading.value = true
   try {
-    const res = scheduleDoctorFilter.value ? await scheduleAPI.getByDoctor(scheduleDoctorFilter.value) : await scheduleAPI.getAll()
+    const res = await scheduleAPI.getAll()
     schedules.value = res.code === 200 ? (res.data || []) : []
     scheduleCurrentPage.value = 1
   } catch {
@@ -340,6 +346,26 @@ const loadSchedules = async () => {
     scheduleLoading.value = false
   }
 }
+
+const filteredSchedules = computed(() => {
+  const today = new Date().toISOString().split('T')[0]
+  const keyword = scheduleSearch.value.trim().toLowerCase()
+  const dateFilter = scheduleDateFilter.value
+  return schedules.value
+    .filter(s => s.scheduleDate && s.scheduleDate >= today)
+    .filter(s => dateFilter ? s.scheduleDate === dateFilter : true)
+    .filter(s => {
+      if (!keyword) return true
+      return (s.doctorName || '').toLowerCase().includes(keyword) ||
+             (s.departmentName || '').toLowerCase().includes(keyword)
+    })
+    .sort((a, b) => (a.scheduleDate || '').localeCompare(b.scheduleDate || ''))
+})
+
+const pagedSchedules = computed(() => {
+  const start = (scheduleCurrentPage.value - 1) * schedulePageSize.value
+  return filteredSchedules.value.slice(start, start + schedulePageSize.value)
+})
 
 const resetReactiveForm = <T extends Record<string, unknown>>(form: T) => {
   ;(Object.keys(form) as Array<keyof T>).forEach((key) => delete form[key])
@@ -460,6 +486,14 @@ const removeSchedule = async (id: number) => {
 const appointmentStatusText = (status?: number) => {
   const map: Record<number, string> = { 1: '已预约', 2: '已签到', 3: '就诊中', 4: '已完成', 5: '已取消', 6: '已退号', 7: '已爽约', 8: '已失效' }
   return map[status ?? 0] || '未知'
+}
+
+const scheduleStatusText = (status: number) => {
+  return ({ 0: '已停诊', 1: '可预约', 2: '已约满' } as Record<number, string>)[status] || '未知'
+}
+
+const scheduleStatusTagType = (status: number) => {
+  return ({ 0: 'info', 1: 'success', 2: 'warning' } as Record<number, string>)[status] || 'info'
 }
 
 const appointmentTagType = (status?: number) => {
@@ -617,5 +651,13 @@ onMounted(async () => {
     align-items: flex-start;
     gap: 16px;
   }
+}
+.text-danger {
+  color: #f56c6c;
+  font-weight: 600;
+}
+
+.text-muted {
+  color: #c0c4cc;
 }
 </style>

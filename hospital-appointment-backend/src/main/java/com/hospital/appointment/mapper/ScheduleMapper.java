@@ -35,6 +35,9 @@ public interface ScheduleMapper {
             "WHERE ds.scheduleDate = #{date} AND ds.scheduleStatus = 1 " +
             "ORDER BY ds.scheduleDate ASC, ds.timeSlot ASC")
     List<DoctorSchedule> selectByDate(LocalDate date);
+
+    @Select("SELECT ds.* FROM doctor_schedule ds WHERE ds.scheduleDate >= CURDATE() LIMIT 1")
+    List<DoctorSchedule> selectFuture();
     
     @Select("<script>" +
             "SELECT ds.*, d.doctorName, d.title AS doctorTitle, dept.departmentName, dept.departmentID " +
