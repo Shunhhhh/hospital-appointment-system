@@ -100,22 +100,6 @@
           <aside class="content-right">
             <div class="module-card sticky-card">
               <div class="module-head">
-                <h2>我的预约</h2>
-                <span class="module-tip">{{ appointments.length }} 条记录</span>
-              </div>
-              <div class="appointment-list">
-                <div v-for="item in appointments" :key="item.id" class="appointment-item">
-                  <div>
-                    <div class="appointment-title">{{ item.department }}</div>
-                    <div class="appointment-desc">{{ item.doctor }} · {{ item.time }}</div>
-                  </div>
-                  <el-tag :type="item.statusType" effect="light">{{ item.status }}</el-tag>
-                </div>
-              </div>
-            </div>
-
-            <div class="module-card sticky-card">
-              <div class="module-head">
                 <h2>通知公告</h2>
                 <span class="module-tip">最新动态</span>
               </div>
