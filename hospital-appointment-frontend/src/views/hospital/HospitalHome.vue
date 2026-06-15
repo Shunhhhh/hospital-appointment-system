@@ -275,8 +275,8 @@ const quickServices = [
 ]
 
 const commonServices = [
-  { title: '排队助手', desc: '实时查看排队进度', icon: Clock, path: '/hospital/my-appointments' },
-  { title: '门诊记录', desc: '快速查阅历史记录', icon: Memo, path: '/hospital/my-appointments' },
+  { title: '排队助手', desc: '实时查看排队进度', icon: Clock, path: '/hospital/queue-assistant' },
+  { title: '门诊记录', desc: '快速查阅历史记录', icon: Memo, path: '/hospital/medical-records' },
   { title: '意见反馈', desc: '提交改进建议', icon: EditPen, path: '/hospital/feedback' },
   { title: '健康宣教', desc: '查看健康科普内容', icon: Reading, path: '/hospital/health-education' }
 ]

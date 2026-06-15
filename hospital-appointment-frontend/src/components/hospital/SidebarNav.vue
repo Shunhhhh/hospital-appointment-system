@@ -22,9 +22,11 @@
 import { useRoute, useRouter } from 'vue-router'
 import {
   Calendar,
+  Clock,
   Document,
   FirstAidKit,
   House,
+  Memo,
   Tickets,
   User
 } from '@element-plus/icons-vue'
@@ -37,6 +39,8 @@ const menus = [
   { label: '预约挂号', path: '/hospital/appointment/departments', icon: Calendar },
   { label: '医生查询', path: '/hospital/doctor-search', icon: FirstAidKit },
   { label: '我的预约', path: '/hospital/my-appointments', icon: Tickets },
+  { label: '排队助手', path: '/hospital/queue-assistant', icon: Clock },
+  { label: '门诊记录', path: '/hospital/medical-records', icon: Memo },
   { label: '检查报告', path: '/hospital/reports', icon: Document },
   { label: '个人中心', path: '/hospital/profile', icon: User }
 ]

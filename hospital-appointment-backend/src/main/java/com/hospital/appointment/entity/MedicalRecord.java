@@ -78,4 +78,8 @@ public class MedicalRecord implements Serializable {
     /** 非数据库字段：患者姓名 */
     @TableField(exist = false)
     private String patientName;
+
+    /** 非数据库字段：科室名称 */
+    @TableField(exist = false)
+    private String departmentName;
 }

@@ -13,6 +13,9 @@ import PatientFeedbackSubmit from '@/views/hospital/PatientFeedbackSubmit.vue'
 import PatientHealthEducation from '@/views/hospital/PatientHealthEducation.vue'
 import PreDiagnosis from '@/views/hospital/PreDiagnosis.vue'
 import CheckReports from '@/views/hospital/CheckReports.vue'
+import QueueAssistant from '@/views/hospital/QueueAssistant.vue'
+import MedicalRecords from '@/views/hospital/MedicalRecords.vue'
+import MedicalRecordDetail from '@/views/hospital/MedicalRecordDetail.vue'
 
 export const hospitalRoutes = [
   {
@@ -139,5 +142,23 @@ export const hospitalRoutes = [
     name: 'PreDiagnosis',
     component: PreDiagnosis,
     meta: { title: '智能预问诊', hideLayout: true }
+  },
+  {
+    path: '/hospital/queue-assistant',
+    name: 'QueueAssistant',
+    component: QueueAssistant,
+    meta: { title: '排队助手', hideLayout: true }
+  },
+  {
+    path: '/hospital/medical-records',
+    name: 'MedicalRecords',
+    component: MedicalRecords,
+    meta: { title: '门诊记录', hideLayout: true }
+  },
+  {
+    path: '/hospital/medical-record/:recordId',
+    name: 'MedicalRecordDetail',
+    component: MedicalRecordDetail,
+    meta: { title: '病历详情', hideLayout: true }
   }
 ]

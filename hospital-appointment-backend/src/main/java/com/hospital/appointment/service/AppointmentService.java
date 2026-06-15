@@ -17,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -334,5 +336,100 @@ public class AppointmentService {
             }
         }
         return LocalTime.of(8, 0);
+    }
+
+    /**
+     * 获取患者排队位置
+     * @return Map: myNumber, currentCallNumber, aheadCount, estimatedWaitMinutes
+     */
+    public Map<String, Object> getQueuePosition(String appointmentId) {
+        Appointment myAppointment = appointmentMapper.selectById(appointmentId);
+        if (myAppointment == null) {
+            throw new AppointmentException("挂号记录不存在");
+        }
+
+        // 获取同一医生、同一天、同一时段的所有挂号记录（按序号排序）
+        List<Appointment> queueList = appointmentMapper.selectTodayByDoctor(
+                myAppointment.getDoctorID(), myAppointment.getAppointmentDate());
+
+        // 过滤出同一时段且已签到的患者
+        List<Appointment> sameSlotList = queueList.stream()
+                .filter(a -> a.getTimeSlot().equals(myAppointment.getTimeSlot()))
+                .collect(Collectors.toList());
+
+        // 当前叫号：第一个状态为"就诊中(3)"的序号，如果没有则取已签到的最小序号
+        Integer currentCallNumber = null;
+        for (Appointment a : sameSlotList) {
+            if (a.getAppointmentStatus() != null && a.getAppointmentStatus() == 3) {
+                currentCallNumber = a.getAppointmentNumber();
+                break;
+            }
+        }
+        // 如果没有人就诊中，找已签到的最小号
+        if (currentCallNumber == null) {
+            currentCallNumber = sameSlotList.stream()
+                    .filter(a -> a.getAppointmentStatus() != null && a.getAppointmentStatus() == 2)
+                    .map(Appointment::getAppointmentNumber)
+                    .min(Integer::compareTo)
+                    .orElse(myAppointment.getAppointmentNumber());
+        }
+
+        // 前面还有几人：已签到且序号在我前面的人
+        long aheadCount = sameSlotList.stream()
+                .filter(a -> a.getAppointmentStatus() != null && a.getAppointmentStatus() == 2)
+                .filter(a -> a.getAppointmentNumber() < myAppointment.getAppointmentNumber())
+                .count();
+
+        // 预计等待：前面人数 × 10分钟
+        int estimatedWaitMinutes = (int) (aheadCount * 10);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("myNumber", myAppointment.getAppointmentNumber());
+        result.put("currentCallNumber", currentCallNumber);
+        result.put("aheadCount", (int) aheadCount);
+        result.put("estimatedWaitMinutes", estimatedWaitMinutes);
+        result.put("appointmentStatus", myAppointment.getAppointmentStatus());
+        result.put("doctorName", myAppointment.getDoctorName());
+        result.put("departmentName", myAppointment.getDepartmentName());
+        result.put("timeSlot", myAppointment.getTimeSlot());
+
+        return result;
+    }
+
+    /**
+     * 医生叫号：将患者从"已签到(2)"改为"就诊中(3)"
+     */
+    @Transactional
+    public boolean callNext(String appointmentId) {
+        Appointment appointment = appointmentMapper.selectById(appointmentId);
+        if (appointment == null) {
+            throw new AppointmentException("挂号记录不存在");
+        }
+        if (appointment.getAppointmentStatus() == null || appointment.getAppointmentStatus() != 2) {
+            throw new AppointmentException("当前状态不可叫号，请确认患者已签到");
+        }
+        return appointmentMapper.updateStatus(appointment.getAppointmentID(), 3) > 0;
+    }
+
+    /**
+     * 获取医生当前队列（今日已签到的患者，按序号排序）
+     */
+    public List<Appointment> getDoctorQueue(Long doctorId) {
+        expireTimeoutAppointments();
+        List<Appointment> todayList = appointmentMapper.selectTodayByDoctor(doctorId, LocalDate.now());
+        // 只返回状态为已签到(2)和就诊中(3)的，按序号排序
+        return todayList.stream()
+                .filter(a -> a.getAppointmentStatus() != null
+                        && (a.getAppointmentStatus() == 2 || a.getAppointmentStatus() == 3))
+                .sorted((a1, a2) -> {
+                    int slotCompare = Integer.compare(
+                            a1.getTimeSlot() != null ? a1.getTimeSlot() : 0,
+                            a2.getTimeSlot() != null ? a2.getTimeSlot() : 0);
+                    if (slotCompare != 0) return slotCompare;
+                    return Integer.compare(
+                            a1.getAppointmentNumber() != null ? a1.getAppointmentNumber() : 0,
+                            a2.getAppointmentNumber() != null ? a2.getAppointmentNumber() : 0);
+                })
+                .collect(Collectors.toList());
     }
 }

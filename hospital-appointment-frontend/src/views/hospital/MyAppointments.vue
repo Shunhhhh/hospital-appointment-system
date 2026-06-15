@@ -91,8 +91,15 @@
             </template>
 
             <template v-else-if="apt.appointmentStatus === 2">
-              <el-button type="success" size="small" disabled>已签到</el-button>
-              <span class="waiting-hint">请等待叫号</span>
+              <div class="queue-actions-group">
+                <div class="queue-position" v-if="queuePositions[apt.appointmentID]">
+                  <span class="queue-pos-label">前面还有</span>
+                  <span class="queue-pos-count">{{ queuePositions[apt.appointmentID].aheadCount }}人</span>
+                  <span class="queue-pos-label">· 预计</span>
+                  <span class="queue-pos-count">{{ queuePositions[apt.appointmentID].estimatedWaitMinutes }}分钟</span>
+                </div>
+                <el-button type="primary" size="small" @click="$router.push('/hospital/queue-assistant')">查看排队</el-button>
+              </div>
             </template>
 
             <template v-else-if="apt.appointmentStatus === 8">
@@ -212,6 +219,8 @@ const isCheckInExpired = (apt: Appointment) => {
   return Date.now() > startTime.getTime() + 5 * 60 * 1000
 }
 
+const queuePositions = ref<Record<string, { aheadCount: number; estimatedWaitMinutes: number; currentCallNumber: number }>>({})
+
 const loadAppointments = async () => {
   loading.value = true
   try {
@@ -226,11 +235,31 @@ const loadAppointments = async () => {
     const res = await appointmentAPI.getByPatient(patientID, status)
     if (res.code === 200) {
       appointments.value = res.data || []
+      // 为已签到的挂号获取排队位置
+      await loadQueuePositions()
     }
   } catch (error) {
     ElMessage.error('加载挂号记录失败')
   } finally {
     loading.value = false
+  }
+}
+
+const loadQueuePositions = async () => {
+  const checkedInList = appointments.value.filter(a => a.appointmentStatus === 2 || a.appointmentStatus === 3)
+  for (const apt of checkedInList) {
+    try {
+      const res = await appointmentAPI.getQueuePosition(apt.appointmentID)
+      if (res.code === 200 && res.data) {
+        queuePositions.value[apt.appointmentID] = {
+          aheadCount: res.data.aheadCount,
+          estimatedWaitMinutes: res.data.estimatedWaitMinutes,
+          currentCallNumber: res.data.currentCallNumber
+        }
+      }
+    } catch {
+      // 单个查询失败忽略
+    }
   }
 }
 
@@ -554,6 +583,27 @@ onMounted(() => {
 
 .waiting-hint.muted {
   color: #9ca3af;
+}
+
+.queue-actions-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.queue-position {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.queue-pos-count {
+  color: #1677ff;
+  font-weight: 700;
+  font-size: 13px;
 }
 
 @media (max-width: 1180px) {

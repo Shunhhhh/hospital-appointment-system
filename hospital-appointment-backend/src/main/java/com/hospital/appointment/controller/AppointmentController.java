@@ -156,4 +156,44 @@ public class AppointmentController {
         long count = appointmentService.getTomorrowAppointmentCount(doctorId);
         return Result.success(count);
     }
+
+    // ========== 排队助手接口 ==========
+
+    /**
+     * 获取患者排队位置
+     */
+    @GetMapping("/queue/position/{appointmentId}")
+    public Result<java.util.Map<String, Object>> getQueuePosition(@PathVariable String appointmentId) {
+        try {
+            java.util.Map<String, Object> position = appointmentService.getQueuePosition(appointmentId);
+            return Result.success(position);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 医生叫号
+     */
+    @PutMapping("/queue/call/{appointmentId}")
+    public Result<String> callNext(@PathVariable String appointmentId) {
+        try {
+            boolean success = appointmentService.callNext(appointmentId);
+            if (success) {
+                return Result.success("叫号成功");
+            }
+            return Result.error("叫号失败");
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 获取医生当前队列
+     */
+    @GetMapping("/queue/doctor/{doctorId}")
+    public Result<List<Appointment>> getDoctorQueue(@PathVariable Long doctorId) {
+        List<Appointment> queue = appointmentService.getDoctorQueue(doctorId);
+        return Result.success(queue);
+    }
 }

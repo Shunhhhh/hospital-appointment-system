@@ -129,5 +129,35 @@ export const appointmentAPI = {
    */
   getTomorrowCount: (doctorId: number) => {
     return request.get<number>('/hospital/appointment/tomorrow/count', { params: { doctorId } })
+  },
+
+  /**
+   * 获取排队位置
+   */
+  getQueuePosition: (appointmentId: string) => {
+    return request.get<{
+      myNumber: number
+      currentCallNumber: number
+      aheadCount: number
+      estimatedWaitMinutes: number
+      appointmentStatus: number
+      doctorName: string
+      departmentName: string
+      timeSlot: number
+    }>(`/hospital/appointment/queue/position/${appointmentId}`)
+  },
+
+  /**
+   * 医生叫号
+   */
+  callNext: (appointmentId: string) => {
+    return request.put<string>(`/hospital/appointment/queue/call/${appointmentId}`)
+  },
+
+  /**
+   * 获取医生当前队列
+   */
+  getDoctorQueue: (doctorId: number) => {
+    return request.get<Appointment[]>(`/hospital/appointment/queue/doctor/${doctorId}`)
   }
 }
