@@ -1,24 +1,13 @@
 <template>
   <div class="hospital-layout">
-    <!-- 右上角用户区 -->
-    <div class="top-right-bar">
-      <el-dropdown v-if="userName" trigger="click">
-        <span class="user-area">
-          <el-avatar :size="36">{{ userName.charAt(0) }}</el-avatar>
-          <span class="user-name">{{ userName }}</span>
-          <el-icon><ArrowDown /></el-icon>
-        </span>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item @click="router.push('/hospital/profile')">个人中心</el-dropdown-item>
-            <el-dropdown-item @click="router.push('/hospital/my-appointments')">我的预约</el-dropdown-item>
-            <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-    </div>
-
-    <!-- 主体区域 -->
+    <header class="top-bar">
+      <span class="top-title">医院预约挂号系统</span>
+      <div class="top-user" @click="handleLogout">
+        <el-avatar :size="32" class="top-avatar">{{ userName.charAt(0) || 'U' }}</el-avatar>
+        <span class="top-name">{{ userName || '用户' }}</span>
+        <el-icon class="top-logout-icon"><SwitchButton /></el-icon>
+      </div>
+    </header>
     <div class="layout-body">
       <aside class="side-panel">
         <div class="side-title">快捷导航</div>
@@ -34,6 +23,7 @@
           </el-icon>
           <span>{{ item.label }}</span>
         </div>
+
       </aside>
 
       <main class="main-content">
@@ -51,13 +41,13 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  ArrowDown,
   Calendar,
   Clock,
   Document,
   FirstAidKit,
   House,
   Memo,
+  SwitchButton,
   Tickets,
   User
 } from '@element-plus/icons-vue'
@@ -76,6 +66,14 @@ const menus = [
   { label: '个人中心', path: '/hospital/profile', icon: User }
 ]
 
+const isActive= (path: string) => {
+  return route.path === path || route.path.startsWith(path + '/')
+}
+
+const showBackButton = computed(() => {
+  return route.path !== '/hospital/home'
+})
+
 const userName = computed(() => {
   const raw = localStorage.getItem('hospital_user')
   if (!raw) return ''
@@ -85,14 +83,6 @@ const userName = computed(() => {
   } catch {
     return ''
   }
-})
-
-const isActive = (path: string) => {
-  return route.path === path || route.path.startsWith(path + '/')
-}
-
-const showBackButton = computed(() => {
-  return route.path !== '/hospital/home'
 })
 
 const handleMenuClick = (path: string) => {
@@ -115,6 +105,7 @@ const handleLogout = async () => {
   ElMessage.success('已退出')
   router.push('/hospital/login')
 }
+
 </script>
 
 <style scoped>
@@ -124,33 +115,54 @@ const handleLogout = async () => {
   position: relative;
 }
 
-/* 右上角用户区 */
-.top-right-bar {
-  position: absolute;
-  top: 16px;
-  right: 24px;
-  z-index: 10;
+/* 顶部栏 */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 52px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
-.user-area {
+.top-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  letter-spacing: 1px;
+}
+
+.top-user {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 14px;
-  border-radius: 20px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
   cursor: pointer;
-  transition: box-shadow 0.2s;
+  padding: 4px 12px 4px 6px;
+  border-radius: 20px;
+  transition: background 0.15s;
 }
 
-.user-area:hover {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+.top-user:hover {
+  background: #f3f4f6;
 }
 
-.user-name {
+.top-avatar {
+  background: #1677ff;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.top-name {
   font-size: 14px;
   color: #374151;
+}
+
+.top-logout-icon {
+  font-size: 16px;
+  color: #9ca3af;
 }
 
 /* 主体 */
@@ -161,19 +173,20 @@ const handleLogout = async () => {
   padding: 16px;
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr);
-  gap: 16px;
+  gap: 0;
   align-items: start;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(31, 41, 55, 0.04);
 }
 
 /* 侧边栏 */
 .side-panel {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(31, 41, 55, 0.04);
   padding: 12px;
   position: sticky;
   top: 16px;
+  border-right: 1px solid #f0f0f0;
 }
 
 .side-title {
@@ -225,6 +238,7 @@ const handleLogout = async () => {
 /* 内容区 */
 .main-content {
   min-width: 0;
+  padding: 16px 20px 20px 20px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
   font-size: 14px;
   line-height: 1.6;
@@ -282,10 +296,6 @@ const handleLogout = async () => {
 
   .side-panel {
     display: none;
-  }
-
-  .top-right-bar {
-    right: 16px;
   }
 }
 </style>
