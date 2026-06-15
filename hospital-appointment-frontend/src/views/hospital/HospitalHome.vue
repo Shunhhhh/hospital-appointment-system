@@ -234,7 +234,7 @@ const topMenus: MenuItem[] = [
   { label: '找医生', path: '/hospital/doctor-search' },
   { label: '检查检验', path: '/hospital/my-appointments' },
   { label: '住院服务', path: '/hospital/profile' },
-  { label: '健康宣教', path: '/hospital/profile' }
+  { label: '健康宣教', path: '/hospital/health-education' }
 ]
 
 const departments: DepartmentCard[] = [
@@ -276,9 +276,9 @@ const quickServices = [
 
 const commonServices = [
   { title: '排队助手', desc: '实时查看排队进度', icon: Clock, path: '/hospital/my-appointments' },
-  { title: '门诊记录', desc: '快速查阅历史记录', icon: Memo, path: '/hospital/profile' },
-  { title: '意见反馈', desc: '提交改进建议', icon: EditPen, path: '/hospital/profile' },
-  { title: '健康宣教', desc: '查看健康科普内容', icon: Reading, path: '/hospital/profile' }
+  { title: '门诊记录', desc: '快速查阅历史记录', icon: Memo, path: '/hospital/my-appointments' },
+  { title: '意见反馈', desc: '提交改进建议', icon: EditPen, path: '/hospital/feedback' },
+  { title: '健康宣教', desc: '查看健康科普内容', icon: Reading, path: '/hospital/health-education' }
 ]
 
 const currentUser = computed(() => {
