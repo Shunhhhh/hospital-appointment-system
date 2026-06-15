@@ -1,5 +1,21 @@
 ﻿<template>
   <div class="hospital-home-page">
+    <div class="top-right-bar">
+      <el-dropdown trigger="click">
+        <span class="user-area">
+          <el-avatar :size="40">{{ userName?.charAt(0) }}</el-avatar>
+          <span class="user-name">{{ userName }}</span>
+          <el-icon><ArrowDown /></el-icon>
+        </span>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item @click="router.push('/hospital/profile')">个人中心</el-dropdown-item>
+            <el-dropdown-item @click="router.push('/hospital/my-appointments')">我的预约</el-dropdown-item>
+            <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </div>
     <div class="page-shell">
       <SidebarNav />
 
@@ -349,6 +365,36 @@ const performSearch = () => {
   min-height: 100vh;
   background: #f5f8fc;
   color: #1f2937;
+  position: relative;
+}
+
+.top-right-bar {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  z-index: 10;
+}
+
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 24px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.user-area:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
+
+.user-name {
+  font-size: 15px;
+  color: #374151;
+  font-weight: 600;
 }
 
 .top-header {
