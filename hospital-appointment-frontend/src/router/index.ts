@@ -3,7 +3,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { hospitalRoutes } from './hospital'
 import StudentCheckIn from '@/views/StudentCheckIn.vue'
-import LogIn from '@/views/LogIn.vue'
 import AdminReservationManagement from '@/views/AdminReservationManagement.vue'
 import SeatList from '@/views/SeatList.vue'
 import SeatMap from '@/views/SeatMap.vue'
@@ -32,9 +31,7 @@ const routes: Array<RouteRecordRaw> = [
   // 原自习室路由继续保留...
   {
     path: '/logIn',
-    name: 'logIn',
-    component: LogIn,
-    meta: { title: '登录注册系统' }
+    redirect: '/hospital/login'
   },
   {
     path: '/checkIn',

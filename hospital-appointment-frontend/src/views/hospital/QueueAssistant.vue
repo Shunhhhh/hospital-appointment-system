@@ -1,11 +1,12 @@
 <template>
   <div class="queue-page">
-    <div class="page-shell">
-      <SidebarNav />
-      <main class="main-area">
-        <div class="page-header">
-          <h1 class="page-title">排队助手</h1>
-          <span class="page-tip">实时查看就诊排队进度，每 10 秒自动刷新</span>
+        <div class="page-head card-base">
+          <div class="page-head-main">
+            <div class="page-title-row">
+              <h1 class="page-title">排队助手</h1>
+              <span class="page-subtitle">实时查看就诊排队进度，每 10 秒自动刷新</span>
+            </div>
+          </div>
         </div>
 
         <!-- 排队中 -->
@@ -38,7 +39,7 @@
                 </div>
                 <div class="node my-node" :class="{ active: true }">
                   <span class="node-dot"></span>
-                  <span class="node-label">我的序号<br/><strong>{{ item.myNumber }}号</strong></span>
+                  <span class="node-label">我的序号<br/>{{ item.myNumber }}号</span>
                 </div>
               </div>
             </div>
@@ -85,8 +86,6 @@
         <div v-if="loading" class="loading-area">
           <el-skeleton :rows="3" animated />
         </div>
-      </main>
-    </div>
   </div>
 </template>
 
@@ -94,7 +93,6 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Bell } from '@element-plus/icons-vue'
-import SidebarNav from '@/components/hospital/SidebarNav.vue'
 import { appointmentAPI } from '@/api/hospital/appointment'
 
 interface QueueItem {
@@ -223,41 +221,6 @@ onUnmounted(() => {
 <style scoped>
 .queue-page {
   min-height: 100vh;
-  background: #f5f8fc;
-}
-
-.page-shell {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 16px;
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 16px;
-}
-
-.main-area {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.page-header {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-}
-
-.page-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #111827;
-  margin: 0;
-}
-
-.page-tip {
-  color: #9ca3af;
-  font-size: 13px;
 }
 
 .queue-list {
@@ -293,7 +256,7 @@ onUnmounted(() => {
 
 .doctor-name {
   font-size: 18px;
-  font-weight: 700;
+  
   color: #111827;
 }
 
@@ -388,7 +351,7 @@ onUnmounted(() => {
 .stat-value {
   display: block;
   font-size: 28px;
-  font-weight: 700;
+  
   color: #1f2937;
 }
 
@@ -414,7 +377,7 @@ onUnmounted(() => {
   gap: 8px;
   color: #1677ff;
   font-size: 14px;
-  font-weight: 600;
+  
 }
 
 .empty-state {
@@ -445,9 +408,4 @@ onUnmounted(() => {
   padding: 24px;
 }
 
-@media (max-width: 960px) {
-  .page-shell {
-    grid-template-columns: 1fr;
-  }
-}
 </style>

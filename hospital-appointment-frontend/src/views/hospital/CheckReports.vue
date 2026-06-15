@@ -1,14 +1,13 @@
 <template>
   <div class="reports-page">
-    <div class="page-shell">
-      <SidebarNav />
-      <main class="main-area">
-        <section class="reports-head">
-          <div class="title-line">
-            <h1 class="page-title">检查报告</h1>
-            <span class="head-note">查看化验、影像与体检报告</span>
+        <div class="page-head card-base">
+          <div class="page-head-main">
+            <div class="page-title-row">
+              <h1 class="page-title">检查报告</h1>
+              <span class="page-subtitle">查看化验、影像与体检报告</span>
+            </div>
           </div>
-        </section>
+        </div>
 
         <div class="filter-bar">
           <el-select v-model="reportType" placeholder="报告类型" clearable>
@@ -46,30 +45,27 @@
 
         <el-dialog v-model="dialogVisible" title="报告详情" width="700px">
           <div v-if="currentReport" class="report-detail">
-            <div class="detail-item"><strong>报告名称：</strong>{{ currentReport.reportName }}</div>
-            <div class="detail-item"><strong>检查科室：</strong>{{ currentReport.departmentName }}</div>
-            <div class="detail-item"><strong>检查医生：</strong>{{ currentReport.doctorName }}</div>
-            <div class="detail-item"><strong>检查日期：</strong>{{ currentReport.checkDate }}</div>
-            <div class="detail-item"><strong>报告状态：</strong>{{ currentReport.reportStatus === 2 ? '已完成' : '处理中' }}</div>
+            <div class="detail-item">报告名称：{{ currentReport.reportName }}</div>
+            <div class="detail-item">检查科室：{{ currentReport.departmentName }}</div>
+            <div class="detail-item">检查医生：{{ currentReport.doctorName }}</div>
+            <div class="detail-item">检查日期：{{ currentReport.checkDate }}</div>
+            <div class="detail-item">报告状态：{{ currentReport.reportStatus === 2 ? '已完成' : '处理中' }}</div>
             <div class="detail-content">
-              <strong>检查结果：</strong>
+              检查结果：
               <p>{{ currentReport.reportContent || '暂无' }}</p>
             </div>
             <div class="detail-content">
-              <strong>医生建议：</strong>
+              医生建议：
               <p>{{ currentReport.doctorAdvice || '暂无' }}</p>
             </div>
           </div>
         </el-dialog>
-      </main>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import SidebarNav from '@/components/hospital/SidebarNav.vue'
 import { Document } from '@element-plus/icons-vue'
 import { checkReportAPI } from '@/api/hospital/checkReport'
 import type { CheckReport } from '@/api/hospital/checkReport'
@@ -139,28 +135,12 @@ onMounted(() => loadReports())
   width: 42px; height: 42px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   color: #fff; background: linear-gradient(135deg, #1677ff 0%, #63b3ff 100%);
-  font-weight: 700; font-size: 14px;
+   font-size: 14px;
 }
-.brand-title { font-size: 16px; font-weight: 700; }
+.brand-title { font-size: 16px;  }
 .brand-subtitle { font-size: 12px; color: #6b7280; }
 
-.page-shell {
-  max-width: 1440px; margin: 0 auto; padding: 16px;
-  display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 16px;
-}
 
-.main-area { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
-
-.reports-head {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 18px 20px;
-}
-
-.title-line { display: flex; align-items: baseline; gap: 12px; }
-.page-title { margin: 0; font-size: 22px; }
-.head-note { color: #6b7280; font-size: 13px; }
 
 .filter-bar {
   background: #ffffff;
@@ -196,16 +176,12 @@ onMounted(() => loadReports())
   border-radius: 10px;
 }
 
-.report-name { font-size: 16px; font-weight: 700; color: #1f2937; }
+.report-name { font-size: 16px;  color: #1f2937; }
 .report-meta { margin-top: 4px; display: flex; gap: 16px; color: #6b7280; font-size: 13px; }
 
 .report-detail .detail-item { margin-bottom: 12px; }
 .report-detail .detail-content { margin-bottom: 16px; line-height: 1.8; }
 .report-detail .detail-content p { color: #4b5563; margin-top: 4px; }
-
-@media (max-width: 1180px) {
-  .page-shell { grid-template-columns: 1fr; }
-}
 
 @media (max-width: 768px) {
   .report-card { grid-template-columns: 1fr; }

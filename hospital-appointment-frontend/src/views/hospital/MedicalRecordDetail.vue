@@ -1,8 +1,5 @@
 <template>
   <div class="detail-page">
-    <div class="page-shell">
-      <SidebarNav />
-      <main class="main-area">
         <!-- 返回 -->
         <div class="back-row">
           <el-button text @click="$router.push('/hospital/medical-records')">
@@ -121,8 +118,6 @@
 
           <el-empty v-if="!loading && !record" description="病历不存在" />
         </div>
-      </main>
-    </div>
   </div>
 </template>
 
@@ -131,7 +126,6 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
-import SidebarNav from '@/components/hospital/SidebarNav.vue'
 import { medicalRecordAPI, type MedicalRecord, type Prescription } from '@/api/hospital/medicalRecord'
 
 const route = useRoute()
@@ -179,22 +173,6 @@ onMounted(() => {
 .detail-page {
   min-height: 100vh;
   background: #f5f8fc;
-}
-
-.page-shell {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 16px;
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 16px;
-}
-
-.main-area {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
 }
 
 .back-row {
@@ -336,10 +314,6 @@ onMounted(() => {
 }
 
 @media (max-width: 960px) {
-  .page-shell {
-    grid-template-columns: 1fr;
-  }
-
   .info-grid {
     grid-template-columns: repeat(2, 1fr);
   }

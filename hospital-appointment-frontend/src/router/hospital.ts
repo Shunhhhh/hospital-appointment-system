@@ -1,3 +1,4 @@
+import HospitalLayout from '@/components/hospital/HospitalLayout.vue'
 import HospitalHome from '@/views/hospital/HospitalHome.vue'
 import DoctorList from '@/views/hospital/DoctorList.vue'
 import DoctorSchedule from '@/views/hospital/DoctorSchedule.vue'
@@ -20,145 +21,152 @@ import MedicalRecordDetail from '@/views/hospital/MedicalRecordDetail.vue'
 export const hospitalRoutes = [
   {
     path: '/hospital',
-    name: 'HospitalRoot',
-    redirect: '/hospital/login'
+    redirect: '/hospital/home'
   },
-  {
-    path: '/hospital/home',
-    name: 'HospitalHome',
-    component: HospitalHome,
-    meta: { title: '医院首页', hideLayout: true }
-  },
-  {
-    path: '/hospital/admin',
-    name: 'HospitalAdminDashboard',
-    component: AdminDashboard,
-    meta: { title: '管理员后台', hideLayout: true }
-  },
+  // 独立页面（不需要布局）
   {
     path: '/hospital/login',
     name: 'HospitalLogin',
     component: PatientLogin,
-    meta: { title: '用户登录', hideLayout: true }
+    meta: { title: '用户登录' }
   },
   {
     path: '/hospital/register',
     name: 'HospitalRegister',
     component: PatientRegister,
-    meta: { title: '用户注册', hideLayout: true }
-  },
-  {
-    path: '/hospital/appointment/departments/:departmentId?',
-    name: 'AppointmentDepartments',
-    component: DoctorList,
-    meta: { title: '预约挂号', hideLayout: true }
-  },
-  {
-    path: '/hospital/appointment/doctors',
-    name: 'AppointmentDoctors',
-    component: DoctorList,
-    meta: { title: '医生列表', hideLayout: true }
-  },
-  {
-    path: '/hospital/appointment/doctor-detail',
-    name: 'AppointmentDoctorDetail',
-    component: DoctorList,
-    meta: { title: '医生详情与号源', hideLayout: true }
-  },
-  {
-    path: '/hospital/doctor-search',
-    name: 'DoctorSearch',
-    component: DoctorList,
-    meta: { title: '医生查询', hideLayout: true }
-  },
-  {
-    path: '/hospital/doctors/:departmentId?',
-    name: 'DoctorList',
-    component: DoctorList,
-    meta: { title: '医生列表', hideLayout: true }
-  },
-  {
-    path: '/hospital/doctor/:doctorId',
-    name: 'DoctorDetail',
-    component: DoctorList,
-    meta: { title: '医生详情', hideLayout: true }
-  },
-  {
-    path: '/hospital/schedule/:doctorId',
-    name: 'DoctorSchedule',
-    component: DoctorSchedule,
-    meta: { title: '选择预约时间', hideLayout: true }
-  },
-  {
-    path: '/hospital/my-appointments',
-    name: 'MyAppointments',
-    component: MyAppointments,
-    meta: { title: '我的挂号', hideLayout: true }
+    meta: { title: '用户注册' }
   },
   {
     path: '/hospital/doctor/workbench',
     name: 'DoctorWorkbench',
     component: DoctorWorkbench,
-    meta: { title: '医生工作台', hideLayout: true }
+    meta: { title: '医生工作台' }
   },
   {
-    path: '/hospital/review/:appointmentId',
-    name: 'ReviewForm',
-    component: ReviewForm,
-    meta: { title: '就诊评价', hideLayout: true }
+    path: '/hospital/admin',
+    name: 'HospitalAdminDashboard',
+    component: AdminDashboard,
+    meta: { title: '管理员后台' }
   },
+  // 统一布局包裹的页面
   {
-    path: '/hospital/profile',
-    name: 'PatientProfile',
-    component: PatientProfile,
-    meta: { title: '个人信息', hideLayout: true }
-  },
-  {
-    path: '/hospital/feedback',
-    name: 'PatientFeedback',
-    component: PatientFeedback,
-    meta: { title: '意见反馈', hideLayout: true }
-  },
-  {
-    path: '/hospital/feedback/submit',
-    name: 'PatientFeedbackSubmit',
-    component: PatientFeedbackSubmit,
-    meta: { title: '提交工单', hideLayout: true }
-  },
-  {
-    path: '/hospital/health-education',
-    name: 'PatientHealthEducation',
-    component: PatientHealthEducation,
-    meta: { title: '健康宣传', hideLayout: true }
-  },
-  {
-    path: '/hospital/reports',
-    name: 'CheckReports',
-    component: CheckReports,
-    meta: { title: '检查报告', hideLayout: true }
-  },
-  {
-    path: '/hospital/pre-diagnosis',
-    name: 'PreDiagnosis',
-    component: PreDiagnosis,
-    meta: { title: '智能预问诊', hideLayout: true }
-  },
-  {
-    path: '/hospital/queue-assistant',
-    name: 'QueueAssistant',
-    component: QueueAssistant,
-    meta: { title: '排队助手', hideLayout: true }
-  },
-  {
-    path: '/hospital/medical-records',
-    name: 'MedicalRecords',
-    component: MedicalRecords,
-    meta: { title: '门诊记录', hideLayout: true }
-  },
-  {
-    path: '/hospital/medical-record/:recordId',
-    name: 'MedicalRecordDetail',
-    component: MedicalRecordDetail,
-    meta: { title: '病历详情', hideLayout: true }
+    path: '/hospital',
+    component: HospitalLayout,
+    children: [
+      {
+        path: 'home',
+        name: 'HospitalHome',
+        component: HospitalHome,
+        meta: { title: '医院首页' }
+      },
+      {
+        path: 'appointment/departments/:departmentId?',
+        name: 'AppointmentDepartments',
+        component: DoctorList,
+        meta: { title: '预约挂号' }
+      },
+      {
+        path: 'appointment/doctors',
+        name: 'AppointmentDoctors',
+        component: DoctorList,
+        meta: { title: '医生列表' }
+      },
+      {
+        path: 'appointment/doctor-detail',
+        name: 'AppointmentDoctorDetail',
+        component: DoctorList,
+        meta: { title: '医生详情与号源' }
+      },
+      {
+        path: 'doctor-search',
+        name: 'DoctorSearch',
+        component: DoctorList,
+        meta: { title: '医生查询' }
+      },
+      {
+        path: 'doctors/:departmentId?',
+        name: 'DoctorList',
+        component: DoctorList,
+        meta: { title: '医生列表' }
+      },
+      {
+        path: 'doctor/:doctorId',
+        name: 'DoctorDetail',
+        component: DoctorList,
+        meta: { title: '医生详情' }
+      },
+      {
+        path: 'schedule/:doctorId',
+        name: 'DoctorSchedule',
+        component: DoctorSchedule,
+        meta: { title: '选择预约时间' }
+      },
+      {
+        path: 'my-appointments',
+        name: 'MyAppointments',
+        component: MyAppointments,
+        meta: { title: '我的挂号' }
+      },
+      {
+        path: 'review/:appointmentId',
+        name: 'ReviewForm',
+        component: ReviewForm,
+        meta: { title: '就诊评价' }
+      },
+      {
+        path: 'profile',
+        name: 'PatientProfile',
+        component: PatientProfile,
+        meta: { title: '个人信息' }
+      },
+      {
+        path: 'feedback',
+        name: 'PatientFeedback',
+        component: PatientFeedback,
+        meta: { title: '意见反馈' }
+      },
+      {
+        path: 'feedback/submit',
+        name: 'PatientFeedbackSubmit',
+        component: PatientFeedbackSubmit,
+        meta: { title: '提交工单' }
+      },
+      {
+        path: 'health-education',
+        name: 'PatientHealthEducation',
+        component: PatientHealthEducation,
+        meta: { title: '健康宣传' }
+      },
+      {
+        path: 'reports',
+        name: 'CheckReports',
+        component: CheckReports,
+        meta: { title: '检查报告' }
+      },
+      {
+        path: 'pre-diagnosis',
+        name: 'PreDiagnosis',
+        component: PreDiagnosis,
+        meta: { title: '智能预问诊' }
+      },
+      {
+        path: 'queue-assistant',
+        name: 'QueueAssistant',
+        component: QueueAssistant,
+        meta: { title: '排队助手' }
+      },
+      {
+        path: 'medical-records',
+        name: 'MedicalRecords',
+        component: MedicalRecords,
+        meta: { title: '门诊记录' }
+      },
+      {
+        path: 'medical-record/:recordId',
+        name: 'MedicalRecordDetail',
+        component: MedicalRecordDetail,
+        meta: { title: '病历详情' }
+      }
+    ]
   }
 ]

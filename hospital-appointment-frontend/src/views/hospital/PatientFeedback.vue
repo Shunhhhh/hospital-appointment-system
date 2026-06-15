@@ -2,7 +2,6 @@
   <div class="feedback-page">
     <section class="hero card-surface">
       <div class="hero-copy">
-        <el-button text class="back-button" @click="router.push('/hospital/home')">← 返回首页</el-button>
         <h1>意见反馈</h1>
         <p>查看全部、待回复和已回复记录，点击下方按钮进入工单提交页。</p>
         <div class="hero-stats">

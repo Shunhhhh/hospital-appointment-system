@@ -3,7 +3,6 @@
     <!-- 顶部导航 -->
     <div class="chat-header">
       <div class="back-bar">
-        <el-button text @click="router.push('/hospital/home')">← 返回首页</el-button>
       </div>
       <div class="header-info">
         <el-icon size="24" style="color:#409eff"><ChatDotRound /></el-icon>

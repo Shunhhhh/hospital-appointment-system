@@ -1,17 +1,18 @@
 <template>
   <div class="profile-page">
-    <section class="profile-head">
-      <div>
-        <el-button text class="back-button" @click="router.push('/hospital/home')">← 返回首页</el-button>
-        <div class="head-title-row">
+    <div class="page-head card-base">
+      <div class="page-head-main">
+        <div class="page-title-row">
           <h1 class="page-title">个人中心</h1>
-          <span class="head-note">维护实名资料、账户安全与就诊记录</span>
+          <span class="page-subtitle">维护实名资料、账户安全与就诊记录</span>
         </div>
       </div>
-      <el-button type="primary" :loading="saving" @click="handleSave" :disabled="!profile">
-        保存修改
-      </el-button>
-    </section>
+      <div class="page-head-tags">
+        <el-button type="primary" :loading="saving" @click="handleSave" :disabled="!profile">
+          保存修改
+        </el-button>
+      </div>
+    </div>
 
     <section v-if="profile" class="profile-layout">
       <aside class="profile-aside">
@@ -31,19 +32,19 @@
         <div class="summary-grid">
           <div class="summary-card card-base accent-orange">
             <span>信用积分</span>
-            <strong>{{ profile.creditScore ?? 0 }}</strong>
+            {{ profile.creditScore ?? 0 }}
           </div>
           <div class="summary-card card-base accent-blue">
             <span>就诊记录</span>
-            <strong>{{ appointments.length }}</strong>
+            {{ appointments.length }}
           </div>
           <div class="summary-card card-base accent-green">
             <span>爽约次数</span>
-            <strong>{{ profile.noshowCount ?? 0 }}</strong>
+            {{ profile.noshowCount ?? 0 }}
           </div>
           <div class="summary-card card-base accent-slate">
             <span>资料完整度</span>
-            <strong>{{ profileCompletion }}%</strong>
+            {{ profileCompletion }}%
           </div>
         </div>
 
@@ -152,7 +153,7 @@
                 <p>建议使用 6 位以上密码，并定期更新，避免与其他平台重复。</p>
                 <div class="security-line">
                   <span>当前登录手机号</span>
-                  <strong>{{ maskedPhone }}</strong>
+                  {{ maskedPhone }}
                 </div>
               </div>
 
@@ -203,7 +204,7 @@
                   </div>
                   <div class="history-time">
                     <span>{{ apt.appointmentDate }}</span>
-                    <strong>{{ apt.timeSlot === 1 ? '上午' : '下午' }}</strong>
+                    {{ apt.timeSlot === 1 ? '上午' : '下午' }}
                   </div>
                   <el-tag :type="getStatusType(apt.appointmentStatus)" effect="light">
                     {{ getStatusText(apt.appointmentStatus) }}
@@ -373,26 +374,10 @@ onMounted(() => {
 .profile-page {
   min-height: 100vh;
   background: #f5f8fc;
-  padding: 24px 32px 40px;
-  max-width: 1504px;
-  margin: 0 auto;
   color: #1f2937;
 }
 
 .card-base {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 10px 28px rgba(31, 41, 55, 0.06);
-}
-
-.profile-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 24px;
-  padding: 20px 24px;
-  margin-bottom: 16px;
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
@@ -404,27 +389,6 @@ onMounted(() => {
   height: auto;
   color: #1677ff;
   font-size: 15px;
-}
-
-.head-title-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 14px;
-  margin-top: 16px;
-}
-
-.page-title {
-  margin: 0;
-  font-size: 30px;
-  line-height: 1.15;
-  font-weight: 700;
-  color: #111827;
-}
-
-.head-note {
-  margin-bottom: 3px;
-  color: #6b7280;
-  font-size: 14px;
 }
 
 .profile-layout {
@@ -465,7 +429,7 @@ onMounted(() => {
   background: linear-gradient(135deg, #1677ff, #51a8ff);
   color: #ffffff;
   font-size: 28px;
-  font-weight: 700;
+  
   box-shadow: 0 10px 24px rgba(22, 119, 255, 0.22);
 }
 
@@ -584,7 +548,7 @@ onMounted(() => {
 
 .profile-tabs :deep(.el-tabs__item.is-active) {
   color: #1677ff;
-  font-weight: 600;
+  
 }
 
 .form-card {
@@ -621,7 +585,7 @@ onMounted(() => {
 
 .profile-form :deep(.el-form-item__label) {
   color: #4b5563;
-  font-weight: 600;
+  
 }
 
 .form-grid {
@@ -750,7 +714,7 @@ onMounted(() => {
 .history-avatar {
   background: #eaf4ff;
   color: #1677ff;
-  font-weight: 700;
+  
 }
 
 .history-doctor h3 {
@@ -804,8 +768,7 @@ onMounted(() => {
     padding: 16px;
   }
 
-  .profile-head,
-  .head-title-row,
+  .page-head,
   .section-head {
     align-items: flex-start;
     flex-direction: column;

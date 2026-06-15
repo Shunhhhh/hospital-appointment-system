@@ -3,7 +3,6 @@
     <section class="education-shell card-surface">
       <header class="education-head">
         <div>
-          <el-button text class="back-button" @click="router.push('/hospital/home')">← 返回首页</el-button>
           <div class="title-line">
             <h1 class="page-title">健康宣传</h1>
             <span class="head-note">按科室浏览常见健康知识，帮助你更快找到对应科普内容</span>

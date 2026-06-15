@@ -1,26 +1,6 @@
 ﻿<template>
   <div class="hospital-home-page">
-    <div class="top-right-bar">
-      <el-dropdown trigger="click">
-        <span class="user-area">
-          <el-avatar :size="40">{{ userName?.charAt(0) }}</el-avatar>
-          <span class="user-name">{{ userName }}</span>
-          <el-icon><ArrowDown /></el-icon>
-        </span>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item @click="router.push('/hospital/profile')">个人中心</el-dropdown-item>
-            <el-dropdown-item @click="router.push('/hospital/my-appointments')">我的预约</el-dropdown-item>
-            <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-    </div>
-    <div class="page-shell">
-      <SidebarNav />
-
-      <main class="main-area">
-        <section class="banner-card">
+    <section class="banner-card">
           <div class="banner-content">
             <div class="banner-kicker">智慧医院 · 便捷挂号 · 在线服务</div>
             <h1 class="banner-title">一站式预约挂号，少排队，更省心</h1>
@@ -129,6 +109,7 @@
                 </div>
               </div>
             </div>
+            <AiFloat />
           </aside>
         </section>
 
@@ -147,8 +128,6 @@
             </button>
           </div>
         </section>
-      </main>
-    </div>
   </div>
 </template>
 
@@ -156,7 +135,8 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import SidebarNav from '@/components/hospital/SidebarNav.vue'
+
+import AiFloat from '@/components/hospital/AiFloat.vue'
 import {
   ArrowDown,
   ArrowRight,
@@ -368,35 +348,6 @@ const performSearch = () => {
   position: relative;
 }
 
-.top-right-bar {
-  position: absolute;
-  top: 16px;
-  right: 24px;
-  z-index: 10;
-}
-
-.user-area {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
-  border-radius: 24px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  cursor: pointer;
-  transition: box-shadow 0.2s;
-}
-
-.user-area:hover {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-}
-
-.user-name {
-  font-size: 15px;
-  color: #374151;
-  font-weight: 600;
-}
-
 .top-header {
   height: 64px;
   padding: 0 24px;
@@ -490,51 +441,6 @@ const performSearch = () => {
   color: #1f2937;
 }
 
-.user-area {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 8px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #ffffff;
-  cursor: pointer;
-}
-
-.user-avatar {
-  background: linear-gradient(135deg, #1677ff, #74b9ff);
-}
-
-.user-meta {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-
-.user-name {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.user-role {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.user-arrow {
-  color: #6b7280;
-}
-
-.page-shell {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 16px 20px 24px;
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 16px;
-}
-
-.side-panel,
 .module-card,
 .banner-card,
 .quick-card {
@@ -542,53 +448,6 @@ const performSearch = () => {
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(31, 41, 55, 0.06);
-}
-
-.side-panel {
-  padding: 12px;
-  position: sticky;
-  top: 80px;
-}
-
-.side-title {
-  padding: 4px 8px 10px;
-  color: #6b7280;
-  font-size: 12px;
-}
-
-.side-item {
-  height: 42px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  color: #374151;
-  transition: all 0.2s ease;
-}
-
-.side-item:hover,
-.side-item.active {
-  background: rgba(22, 119, 255, 0.08);
-  color: #1677ff;
-}
-
-.side-icon {
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  font-size: 18px;
-}
-
-.main-area {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
 }
 
 .banner-card {
@@ -801,6 +660,7 @@ const performSearch = () => {
   flex-direction: column;
   gap: 16px;
   min-width: 0;
+  position: relative;
 }
 
 .module-card {
@@ -808,8 +668,6 @@ const performSearch = () => {
 }
 
 .sticky-card {
-  position: sticky;
-  top: 80px;
 }
 
 .module-head {
@@ -1011,9 +869,6 @@ const performSearch = () => {
     grid-template-columns: 1fr;
   }
 
-  .sticky-card {
-    position: static;
-  }
 }
 
 @media (max-width: 960px) {
@@ -1035,14 +890,6 @@ const performSearch = () => {
 
   .header-tools {
     margin-left: auto;
-  }
-
-  .page-shell {
-    grid-template-columns: 1fr;
-  }
-
-  .side-panel {
-    position: static;
   }
 
   .quick-services,

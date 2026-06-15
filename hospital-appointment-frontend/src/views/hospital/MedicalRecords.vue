@@ -1,11 +1,12 @@
 <template>
   <div class="records-page">
-    <div class="page-shell">
-      <SidebarNav />
-      <main class="main-area">
-        <div class="page-header">
-          <h1 class="page-title">门诊记录</h1>
-          <span class="page-tip">查看历史就诊病历和处方</span>
+        <div class="page-head card-base">
+          <div class="page-head-main">
+            <div class="page-title-row">
+              <h1 class="page-title">门诊记录</h1>
+              <span class="page-subtitle">查看历史就诊病历和处方</span>
+            </div>
+          </div>
         </div>
 
         <div class="records-list" v-loading="loading">
@@ -41,8 +42,6 @@
             <el-button type="primary" @click="$router.push('/hospital/home')">去预约挂号</el-button>
           </el-empty>
         </div>
-      </main>
-    </div>
   </div>
 </template>
 
@@ -51,7 +50,6 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ArrowRight } from '@element-plus/icons-vue'
-import SidebarNav from '@/components/hospital/SidebarNav.vue'
 import { medicalRecordAPI, type MedicalRecord } from '@/api/hospital/medicalRecord'
 
 const router = useRouter()
@@ -113,41 +111,6 @@ onMounted(() => {
 <style scoped>
 .records-page {
   min-height: 100vh;
-  background: #f5f8fc;
-}
-
-.page-shell {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 16px;
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 16px;
-}
-
-.main-area {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.page-header {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-}
-
-.page-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #111827;
-  margin: 0;
-}
-
-.page-tip {
-  color: #9ca3af;
-  font-size: 13px;
 }
 
 .records-list {
@@ -192,7 +155,7 @@ onMounted(() => {
 
 .date-day {
   font-size: 22px;
-  font-weight: 700;
+  
   line-height: 1;
 }
 
@@ -209,7 +172,7 @@ onMounted(() => {
 
 .record-doctor {
   font-size: 16px;
-  font-weight: 700;
+  
   color: #111827;
 }
 
@@ -250,10 +213,6 @@ onMounted(() => {
 }
 
 @media (max-width: 960px) {
-  .page-shell {
-    grid-template-columns: 1fr;
-  }
-
   .card-right {
     display: none;
   }

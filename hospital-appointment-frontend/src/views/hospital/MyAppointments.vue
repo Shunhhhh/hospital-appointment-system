@@ -1,26 +1,25 @@
 <template>
   <div class="appointments-page">
-    <div class="page-shell">
-      <SidebarNav />
-      <main class="main-area">
-    <section class="appointments-head">
-      <div>
-        <div class="title-line">
+    <div class="page-head card-base">
+      <div class="page-head-main">
+        <div class="page-title-row">
           <h1 class="page-title">我的预约</h1>
-          <span class="head-note">查看待就诊、签到、完成与失效记录</span>
+          <span class="page-subtitle">查看待就诊、签到、完成与失效记录</span>
         </div>
       </div>
-      <div class="head-stats">
-        <div class="stat-pill primary">
-          <span class="stat-value">{{ appointments.length }}</span>
-          <span class="stat-label">当前记录</span>
-        </div>
-        <div class="stat-pill">
-          <span class="stat-value">{{ activeCount }}</span>
-          <span class="stat-label">待处理</span>
+      <div class="page-head-tags">
+        <div class="head-stats">
+          <div class="stat-pill primary">
+            <span class="stat-value">{{ appointments.length }}</span>
+            <span class="stat-label">当前记录</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-value">{{ activeCount }}</span>
+            <span class="stat-label">待处理</span>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
 
     <!-- 状态筛选 -->
     <div class="status-tabs">
@@ -33,7 +32,7 @@
         @click="changeStatus(tab.value)"
       >
         <span>{{ tab.label }}</span>
-        <strong>{{ tab.count }}</strong>
+        {{ tab.count }}
       </button>
     </div>
 
@@ -123,8 +122,6 @@
     <el-empty v-if="!loading && appointments.length === 0" description="暂无挂号记录">
       <el-button type="primary" @click="$router.push('/hospital/home')">去预约</el-button>
     </el-empty>
-      </main>
-    </div>
   </div>
 </template>
 
@@ -132,13 +129,13 @@
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import SidebarNav from '@/components/hospital/SidebarNav.vue'
 import { appointmentAPI } from '@/api/hospital/appointment'
 import type { Appointment } from '@/api/hospital/appointment'
 
 const router = useRouter()
 const loading = ref(false)
-const appointments = ref<Appointment[]>([])
+const allAppointments = ref<Appointment[]>([])  // 全部数据（计数用）
+const appointments = ref<Appointment[]>([])      // 当前筛选后的显示列表
 const statusFilter = ref('')
 
 const statusOptions = [
@@ -148,20 +145,19 @@ const statusOptions = [
   { label: '已完成', value: '4' },
   { label: '已取消', value: '5' },
   { label: '已爽约', value: '7' },
-  { label: '已过期', value: '8' },
   { label: '已失效', value: '8' }
 ]
 
 const activeCount = computed(() => {
-  return appointments.value.filter(item => item.appointmentStatus === 1 || item.appointmentStatus === 2).length
+  return allAppointments.value.filter(item => item.appointmentStatus === 1 || item.appointmentStatus === 2).length
 })
 
 const statusTabs = computed(() => {
   return statusOptions.map(item => ({
     ...item,
     count: item.value
-      ? appointments.value.filter(apt => String(apt.appointmentStatus) === item.value).length
-      : appointments.value.length
+      ? allAppointments.value.filter(apt => String(apt.appointmentStatus) === item.value).length
+      : allAppointments.value.length
   }))
 })
 
@@ -226,15 +222,23 @@ const loadAppointments = async () => {
   try {
     const patientID = getCurrentPatientId()
     if (!patientID) {
+      allAppointments.value = []
       appointments.value = []
       ElMessage.warning('请先登录患者账号')
       router.push('/hospital/login')
       return
     }
-    const status = statusFilter.value ? Number(statusFilter.value) : undefined
-    const res = await appointmentAPI.getByPatient(patientID, status)
+    // 始终拉取全部数据用于计数
+    const res = await appointmentAPI.getByPatient(patientID, undefined)
     if (res.code === 200) {
-      appointments.value = res.data || []
+      allAppointments.value = res.data || []
+      // 客户端筛选显示
+      if (statusFilter.value) {
+        const filterStatus = Number(statusFilter.value)
+        appointments.value = allAppointments.value.filter(a => a.appointmentStatus === filterStatus)
+      } else {
+        appointments.value = allAppointments.value
+      }
       // 为已签到的挂号获取排队位置
       await loadQueuePositions()
     }
@@ -319,64 +323,16 @@ onMounted(() => {
   color: #1f2937;
 }
 
-.page-shell {
-  max-width: 1440px; margin: 0 auto; padding: 16px;
-  display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 16px;
-}
-
-.main-area { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
-
-.my-appointments {
+.appointments-page {
   min-height: 100vh;
-  background: #f5f8fc;
-  padding: 18px 20px 28px;
-  max-width: 1440px;
-  margin: 0 auto;
-  color: #1f2937;
 }
 
-.appointments-head,
 .status-tabs,
 .appointment-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(31, 41, 55, 0.06);
-}
-
-.appointments-head {
-  padding: 16px 20px;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.back-button {
-  color: #1677ff;
-  padding-left: 0;
-}
-
-.title-line {
-  margin-top: 4px;
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.page-title {
-  margin: 0;
-  font-size: 26px;
-  line-height: 1.25;
-  color: #111827;
-  font-weight: 700;
-}
-
-.head-note {
-  color: #6b7280;
-  font-size: 13px;
 }
 
 .head-stats {
@@ -403,7 +359,7 @@ onMounted(() => {
   color: #1677ff;
   font-size: 22px;
   line-height: 1;
-  font-weight: 700;
+  
 }
 
 .stat-label {
@@ -511,7 +467,7 @@ onMounted(() => {
 .doctor-name {
   font-size: 20px;
   line-height: 1.25;
-  font-weight: 700;
+  
   color: #111827;
 }
 
@@ -548,7 +504,7 @@ onMounted(() => {
   margin-top: 4px;
   color: #1f2937;
   font-size: 15px;
-  font-weight: 600;
+  
 }
 
 .no-value {
@@ -602,15 +558,11 @@ onMounted(() => {
 
 .queue-pos-count {
   color: #1677ff;
-  font-weight: 700;
+  
   font-size: 13px;
 }
 
 @media (max-width: 1180px) {
-  .page-shell {
-    grid-template-columns: 1fr;
-  }
-
   .card-main {
     grid-template-columns: 1fr;
     align-items: stretch;
@@ -622,7 +574,7 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .appointments-head {
+  .page-head {
     flex-direction: column;
     align-items: flex-start;
   }

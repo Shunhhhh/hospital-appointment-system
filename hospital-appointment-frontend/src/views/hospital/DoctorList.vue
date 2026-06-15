@@ -1,12 +1,7 @@
 ﻿<template>
   <div class="appointment-workbench">
-    <div class="page-shell">
-      <SidebarNav />
-
-      <main class="main-area">
         <div class="page-head card-base">
           <div class="page-head-main">
-            <el-button text class="back-button" @click="handleBackHome">← 返回首页</el-button>
             <div class="page-title-row">
               <h1 class="page-title">{{ currentStep === 'doctorSearch' ? '医生查询' : '预约挂号' }}</h1>
               <span class="page-subtitle">
@@ -320,8 +315,6 @@
             </div>
           </div>
         </section>
-      </main>
-    </div>
   </div>
 </template>
 
@@ -329,7 +322,6 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import SidebarNav from '@/components/hospital/SidebarNav.vue'
 import {
   ArrowDown,
   Calendar,
@@ -1271,15 +1263,6 @@ onMounted(() => {
   color: #6b7280;
 }
 
-.page-shell {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 16px;
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 16px;
-}
-
 .side-panel,
 .card-base {
   border-radius: 12px;
@@ -1326,13 +1309,6 @@ onMounted(() => {
   justify-content: center;
   flex: 0 0 auto;
   font-size: 18px;
-}
-
-.main-area {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 .page-head {
@@ -1395,9 +1371,6 @@ onMounted(() => {
 
 .filter-card {
   padding: 14px 16px 12px;
-  position: sticky;
-  top: 80px;
-  z-index: 6;
 }
 
 .filter-row {
@@ -1805,8 +1778,6 @@ onMounted(() => {
 .doctor-filter {
   padding: 16px;
   height: fit-content;
-  position: sticky;
-  top: 172px;
 }
 
 .doctor-filter h3 {
@@ -1939,8 +1910,6 @@ onMounted(() => {
 
 .source-card {
   padding: 16px;
-  position: sticky;
-  top: 156px;
 }
 
 .source-head {

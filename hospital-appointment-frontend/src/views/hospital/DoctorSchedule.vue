@@ -1,7 +1,6 @@
 <template>
   <div class="appointment-page">
     <div class="back-bar">
-      <el-button text @click="router.push('/hospital/home')">← 返回首页</el-button>
     </div>
     <h1 class="page-title">选择预约时间</h1>
 
