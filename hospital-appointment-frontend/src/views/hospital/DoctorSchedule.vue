@@ -99,7 +99,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import BackHomeButton from '@/components/hospital/BackHomeButton.vue'
+
 import { doctorAPI } from '@/api/hospital/doctor'
 import { scheduleAPI } from '@/api/hospital/schedule'
 import { appointmentAPI } from '@/api/hospital/appointment'

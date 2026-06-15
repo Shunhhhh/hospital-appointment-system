@@ -100,11 +100,28 @@ public class FeedBackServiceImpl implements FeedBackService {
             throw new RuntimeException("反馈记录不存在");
         }
 
+        // 如果状态被设置为已回复或已关闭，且未提供回复时间，则自动设置
+        Integer targetStatus = feedback.getProcessStatus();
+        if (targetStatus != null && (targetStatus == 3 || targetStatus == 4)) {
+            if (feedback.getReplyTime() == null) {
+                feedback.setReplyTime(LocalDateTime.now());
+            }
+        }
+
         // 记录原始状态，用于判断是否需要发送通知
         Integer originalStatus = existingFeedback.getProcessStatus();
 
+        System.out.println("===== 更新反馈诊断 =====");
+        System.out.println("反馈ID: " + feedback.getFeedbackID());
+        System.out.println("新回复内容: " + feedback.getReplyContent());
+        System.out.println("新回复时间: " + feedback.getReplyTime());
+        System.out.println("新状态: " + targetStatus + " (原状态: " + originalStatus + ")");
+        System.out.println("已存在的记录: " + (existingFeedback != null));
+
         // 执行更新
         int result = feedBackMapper.updateById(feedback);
+        System.out.println("updateById 返回行数: " + result);
+        System.out.println("========================");
 
         // 如果更新成功，检查是否需要发送通知
         if (result > 0) {

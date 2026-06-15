@@ -1,7 +1,5 @@
 <template>
   <div class="doctor-workbench">
-    <BackHomeButton />
-
     <div class="header">
       <h1>医生工作台</h1>
       <div class="doctor-info">
@@ -117,7 +115,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowDown } from '@element-plus/icons-vue'
-import BackHomeButton from '@/components/hospital/BackHomeButton.vue'
+
 import { appointmentAPI } from '@/api/hospital/appointment'
 import type { Appointment } from '@/api/hospital/appointment'
 

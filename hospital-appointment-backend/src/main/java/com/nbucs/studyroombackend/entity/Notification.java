@@ -18,7 +18,7 @@ public class Notification {
     @TableField("adminID")
     private Integer adminID;
 
-    @TableField("studentID")
+    @TableField("patientID")
     private Integer studentID;
 
     @TableField("sendTime")
@@ -36,7 +36,7 @@ public class Notification {
     @TableField("title")
     private String title;
 
-    @TableField("relatedRecordID")
+    @TableField("relatedID")
     private String relatedRecordID;     // 关联记录ID，如预约ID、反馈ID等
 
     @TableField("readTime")

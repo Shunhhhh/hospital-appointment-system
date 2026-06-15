@@ -165,7 +165,127 @@
           <el-table-column prop="paymentAmount" label="金额" width="100" />
         </el-table>
       </el-tab-pane>
+
+      <el-tab-pane label="反馈管理" name="feedback">
+        <div class="pane-toolbar">
+          <el-select v-model="feedbackStatusFilter" placeholder="按状态筛选" clearable style="width: 160px">
+            <el-option label="全部" :value="-1" />
+            <el-option label="待处理" :value="1" />
+            <el-option label="处理中" :value="2" />
+            <el-option label="已回复" :value="3" />
+            <el-option label="已关闭" :value="4" />
+          </el-select>
+          <el-button type="primary" @click="loadFeedbacks">
+            <el-icon><Refresh /></el-icon>
+            刷新
+          </el-button>
+        </div>
+
+        <el-table :data="filteredFeedbacks" border stripe v-loading="feedbackLoading" style="width: 100%">
+          <el-table-column prop="feedbackID" label="反馈编号" width="160" />
+          <el-table-column label="患者ID" width="100">
+            <template #default="scope">
+              {{ scope.row.studentID || '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column label="反馈类型" width="100">
+            <template #default="scope">
+              <el-tag :type="feedbackTagType(scope.row.feedbackType)" size="small">
+                {{ feedbackTypeText(scope.row.feedbackType) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="feedbackContent" label="反馈内容" min-width="220" show-overflow-tooltip />
+          <el-table-column label="优先级" width="90">
+            <template #default="scope">
+              <el-tag :type="priorityTagType(scope.row.priority)" size="small">
+                {{ priorityText(scope.row.priority) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="状态" width="100">
+            <template #default="scope">
+              <el-tag :type="feedbackStatusTagType(scope.row.processStatus)">
+                {{ feedbackStatusText(scope.row.processStatus) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="提交时间" width="160">
+            <template #default="scope">
+              {{ formatFeedbackTime(scope.row.feedbackTime) }}
+            </template>
+          </el-table-column>
+          <el-table-column label="回复内容" min-width="180" show-overflow-tooltip>
+            <template #default="scope">
+              <span v-if="scope.row.replyContent" class="reply-preview">{{ scope.row.replyContent }}</span>
+              <span v-else class="text-muted">暂未回复</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="200" fixed="right">
+            <template #default="scope">
+              <div class="action-row">
+                <el-button text type="primary" size="small" @click="openFeedbackReplyDialog(scope.row)">
+                  回复
+                </el-button>
+                <el-button
+                  v-if="scope.row.processStatus !== 4"
+                  text
+                  type="warning"
+                  size="small"
+                  @click="closeFeedback(scope.row.feedbackID)"
+                >
+                  关闭
+                </el-button>
+                <el-button
+                  v-if="scope.row.processStatus === 4"
+                  text
+                  type="success"
+                  size="small"
+                  @click="reopenFeedback(scope.row.feedbackID)"
+                >
+                  重开
+                </el-button>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
     </el-tabs>
+
+    <el-dialog v-model="feedbackReplyVisible" title="回复反馈" width="600px" :close-on-click-modal="false">
+      <el-descriptions :column="1" border size="small" style="margin-bottom: 18px">
+        <el-descriptions-item label="反馈编号">{{ feedbackReplyForm.feedbackID }}</el-descriptions-item>
+        <el-descriptions-item label="患者ID">{{ feedbackReplyForm.studentID || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="反馈类型">{{ feedbackTypeText(feedbackReplyForm.feedbackType) }}</el-descriptions-item>
+        <el-descriptions-item label="反馈内容">
+          <div style="white-space: pre-wrap; max-height: 120px; overflow-y: auto;">{{ feedbackReplyForm.feedbackContent }}</div>
+        </el-descriptions-item>
+        <el-descriptions-item label="提交时间">{{ formatFeedbackTime(feedbackReplyForm.feedbackTime) }}</el-descriptions-item>
+        <el-descriptions-item label="已有回复">
+          <span v-if="feedbackReplyForm.existingReply">{{ feedbackReplyForm.existingReply }}</span>
+          <span v-else class="text-muted">暂无</span>
+        </el-descriptions-item>
+      </el-descriptions>
+      <el-form label-width="80px">
+        <el-form-item label="回复内容" required>
+          <el-input
+            v-model="feedbackReplyForm.reply"
+            type="textarea"
+            :rows="5"
+            placeholder="请输入回复内容..."
+            maxlength="1000"
+            show-word-limit
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="feedbackReplyVisible = false">取消</el-button>
+        <el-button type="primary" :loading="feedbackReplyLoading" @click="submitFeedbackReply">
+          提交回复
+        </el-button>
+      </template>
+    </el-dialog>
+  </div>
 
     <el-dialog v-model="departmentDialogVisible" :title="departmentForm.departmentID ? '编辑科室' : '新增科室'" width="520px">
       <el-form :model="departmentForm" label-width="100px">
@@ -242,24 +362,49 @@
         <el-button type="primary" @click="saveSchedule">保存</el-button>
       </template>
     </el-dialog>
-  </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowDown } from '@element-plus/icons-vue'
+import { ArrowDown, Refresh } from '@element-plus/icons-vue'
 import { departmentAPI } from '@/api/hospital/department'
 import { doctorAPI } from '@/api/hospital/doctor'
 import { scheduleAPI } from '@/api/hospital/schedule'
 import { appointmentAPI } from '@/api/hospital/appointment'
+import request from '@/api/request'
 import type { Department } from '@/api/hospital/department'
 import type { Doctor } from '@/api/hospital/doctor'
 import type { DoctorSchedule } from '@/api/hospital/schedule'
 import type { Appointment } from '@/api/hospital/appointment'
 
+interface FeedbackRecord {
+  feedbackID: string
+  studentID: number | null
+  processAdminID?: number | null
+  feedbackType: number
+  feedbackContent: string
+  processStatus: number
+  feedbackTime: string
+  replyContent?: string | null
+  replyTime?: string | null
+  contactInfo?: string | null
+  priority: number
+}
+
 const router = useRouter()
+
+const getAdminId = (): number | null => {
+  try {
+    const raw = localStorage.getItem('hospital_user')
+    if (!raw) return null
+    const user = JSON.parse(raw)
+    return user.adminID ?? user.user?.adminID ?? null
+  } catch {
+    return null
+  }
+}
 const activeTab = ref('department')
 const adminName = computed(() => {
   try {
@@ -276,6 +421,17 @@ const departments = ref<Department[]>([])
 const doctors = ref<Doctor[]>([])
 const schedules = ref<DoctorSchedule[]>([])
 const appointments = ref<Appointment[]>([])
+const feedbacks = ref<FeedbackRecord[]>([])
+const feedbackStatusFilter = ref<number>(-1)
+const feedbackReplyForm = reactive({
+  feedbackID: '',
+  studentID: null as number | null,
+  feedbackType: 0,
+  feedbackContent: '',
+  feedbackTime: '',
+  existingReply: '',
+  reply: ''
+})
 const scheduleSearch = ref('')
 const scheduleDateFilter = ref('')
 const scheduleCurrentPage = ref(1)
@@ -285,10 +441,13 @@ const departmentLoading = ref(false)
 const doctorLoading = ref(false)
 const scheduleLoading = ref(false)
 const appointmentLoading = ref(false)
+const feedbackLoading = ref(false)
+const feedbackReplyLoading = ref(false)
 
 const departmentDialogVisible = ref(false)
 const doctorDialogVisible = ref(false)
 const scheduleDialogVisible = ref(false)
+const feedbackReplyVisible = ref(false)
 
 const departmentForm = reactive<Partial<Department>>({})
 const doctorForm = reactive<Partial<Doctor & { doctorPassword?: string }>>({ doctorStatus: 1 })
@@ -380,6 +539,144 @@ const loadAppointments = async () => {
     ElMessage.error('加载挂号记录失败')
   } finally {
     appointmentLoading.value = false
+  }
+}
+
+const filteredFeedbacks = computed(() => {
+  if (feedbackStatusFilter.value === -1 || !feedbackStatusFilter.value) {
+    return feedbacks.value
+  }
+  return feedbacks.value.filter(f => f.processStatus === feedbackStatusFilter.value)
+})
+
+const feedbackTypeText = (type?: number) => {
+  const map: Record<number, string> = { 1: '积分', 2: '挂号', 3: '报告查询', 4: '问诊' }
+  return map[type ?? 0] || '未分类'
+}
+
+const feedbackTagType = (type?: number) => {
+  const map: Record<number, string> = { 1: 'info', 2: 'warning', 3: '', 4: 'primary' }
+  return (map[type ?? 0] || 'info') as 'info' | 'warning' | 'primary' | '' | 'success' | 'danger'
+}
+
+const priorityText = (priority?: number) => {
+  const map: Record<number, string> = { 1: '低', 2: '中', 3: '高' }
+  return map[priority ?? 2] || '中'
+}
+
+const priorityTagType = (priority?: number) => {
+  const map: Record<number, string> = { 1: 'info', 2: 'warning', 3: 'danger' }
+  return (map[priority ?? 2] || 'info') as 'info' | 'warning' | 'primary' | '' | 'success' | 'danger'
+}
+
+const feedbackStatusText = (status?: number) => {
+  const map: Record<number, string> = { 1: '待处理', 2: '处理中', 3: '已回复', 4: '已关闭' }
+  return map[status ?? 1] || '未知'
+}
+
+const feedbackStatusTagType = (status?: number) => {
+  const map: Record<number, string> = { 1: 'warning', 2: '', 3: 'success', 4: 'info' }
+  return (map[status ?? 1] || 'info') as 'info' | 'warning' | 'primary' | '' | 'success' | 'danger'
+}
+
+const formatFeedbackTime = (time?: string) => {
+  if (!time) return '-'
+  try {
+    const d = new Date(time)
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    const h = String(d.getHours()).padStart(2, '0')
+    const min = String(d.getMinutes()).padStart(2, '0')
+    return `${y}-${m}-${day} ${h}:${min}`
+  } catch {
+    return time
+  }
+}
+
+const loadFeedbacks = async () => {
+  feedbackLoading.value = true
+  try {
+    const res = await request.get('/feedback/all')
+    const data = res?.data
+    if (data && Array.isArray(data.feedbacks)) {
+      feedbacks.value = data.feedbacks as FeedbackRecord[]
+    } else {
+      feedbacks.value = []
+    }
+  } catch {
+    ElMessage.error('加载反馈列表失败')
+    feedbacks.value = []
+  } finally {
+    feedbackLoading.value = false
+  }
+}
+
+const openFeedbackReplyDialog = (record: FeedbackRecord) => {
+  feedbackReplyForm.feedbackID = record.feedbackID
+  feedbackReplyForm.studentID = record.studentID
+  feedbackReplyForm.feedbackType = record.feedbackType
+  feedbackReplyForm.feedbackContent = record.feedbackContent
+  feedbackReplyForm.feedbackTime = record.feedbackTime
+  feedbackReplyForm.existingReply = record.replyContent || ''
+  feedbackReplyForm.reply = ''
+  feedbackReplyVisible.value = true
+}
+
+const submitFeedbackReply = async () => {
+  if (!feedbackReplyForm.reply.trim()) {
+    ElMessage.warning('请输入回复内容')
+    return
+  }
+  feedbackReplyLoading.value = true
+  try {
+    const payload = {
+      feedbackID: feedbackReplyForm.feedbackID,
+      replyContent: feedbackReplyForm.reply.trim(),
+      processStatus: 3,
+      processAdminID: getAdminId()
+    }
+    const res = await request.put('/feedback/update', payload)
+    console.log('回复响应:', JSON.stringify(res))
+    if (res?.code === 200) {
+      ElMessage.success('回复已提交')
+      feedbackReplyVisible.value = false
+      await loadFeedbacks()
+    } else {
+      ElMessage.error(res?.message || '回复失败，请稍后重试')
+    }
+  } catch {
+    ElMessage.error('回复请求失败，请检查网络')
+  } finally {
+    feedbackReplyLoading.value = false
+  }
+}
+
+const closeFeedback = async (feedbackId: string) => {
+  try {
+    const res = await request.put('/feedback/status', null, { params: { feedbackId, newStatus: 4 } })
+    if (res?.code === 200) {
+      ElMessage.success('已关闭该反馈')
+      await loadFeedbacks()
+    } else {
+      ElMessage.error(res?.message || '操作失败')
+    }
+  } catch {
+    ElMessage.error('操作失败，请检查网络')
+  }
+}
+
+const reopenFeedback = async (feedbackId: string) => {
+  try {
+    const res = await request.put('/feedback/status', null, { params: { feedbackId, newStatus: 1 } })
+    if (res?.code === 200) {
+      ElMessage.success('已重开该反馈')
+      await loadFeedbacks()
+    } else {
+      ElMessage.error(res?.message || '操作失败')
+    }
+  } catch {
+    ElMessage.error('操作失败，请检查网络')
   }
 }
 
@@ -514,6 +811,7 @@ watch(activeTab, (value) => {
   if (value === 'doctor' && doctors.value.length === 0) loadDoctors()
   if (value === 'schedule' && schedules.value.length === 0) loadSchedules()
   if (value === 'appointment' && appointments.value.length === 0) loadAppointments()
+  if (value === 'feedback' && feedbacks.value.length === 0) loadFeedbacks()
 })
 
 onMounted(async () => {
@@ -659,5 +957,8 @@ onMounted(async () => {
 
 .text-muted {
   color: #c0c4cc;
+}
+.reply-preview {
+  color: #1d8a58;
 }
 </style>
