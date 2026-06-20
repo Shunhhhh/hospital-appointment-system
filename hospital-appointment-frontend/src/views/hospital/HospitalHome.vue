@@ -69,10 +69,10 @@
             <div class="module-card">
               <div class="module-head">
                 <h2>推荐医生</h2>
-                <span class="module-tip">根据科室热度智能推荐</span>
+                
               </div>
               <div class="doctor-list">
-                <article v-for="doctor in visibleDoctors" :key="doctor.id" class="doctor-card">
+                <article v-for="doctor in recommendedDoctors" :key="doctor.id" class="doctor-card">
                   <el-avatar :size="60" class="doctor-avatar">{{ doctor.name.slice(0, 1) }}</el-avatar>
                   <div class="doctor-main">
                     <div class="doctor-row">
@@ -80,11 +80,9 @@
                         <div class="doctor-name">{{ doctor.name }}</div>
                         <div class="doctor-meta">{{ doctor.title }} · {{ doctor.department }}</div>
                       </div>
-                      <el-tag effect="light" type="success">{{ doctor.available }}</el-tag>
                     </div>
                     <div class="doctor-skill">擅长：{{ doctor.skill }}</div>
                     <div class="doctor-footer">
-                      <span class="doctor-time">可预约：{{ doctor.time }}</span>
                       <el-button type="primary" size="small" @click="goToSchedule(doctor.id)">预约挂号</el-button>
                     </div>
                   </div>
@@ -100,13 +98,14 @@
                 <span class="module-tip">最新动态</span>
               </div>
               <div class="notice-list">
-                <div v-for="item in notices" :key="item.title" class="notice-item">
-                  <div class="notice-dot" :class="item.level"></div>
+                <div v-for="item in notices" :key="item.notificationID" class="notice-item">
+                  <div class="notice-dot success"></div>
                   <div class="notice-content">
                     <div class="notice-title">{{ item.title }}</div>
-                    <div class="notice-desc">{{ item.desc }}</div>
+                    <div class="notice-desc">{{ item.notificationContent }}</div>
                   </div>
                 </div>
+                <el-empty v-if="notices.length === 0" description="暂无通知" :image-size="60" />
               </div>
             </div>
             <AiFloat />
@@ -132,9 +131,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { doctorAPI } from '@/api/hospital/doctor'
+import { notificationAPI } from '@/api/hospital/notification'
 
 import AiFloat from '@/components/hospital/AiFloat.vue'
 import {
@@ -228,12 +229,27 @@ const departments: DepartmentCard[] = [
   { id: 5, name: '骨科', icon: OfficeBuilding, desc: '骨关节、运动损伤与康复' }
 ]
 
-const doctors: DoctorCard[] = [
-  { id: 101, name: '李敏', title: '主任医师', department: '内科', skill: '高血压、糖尿病、慢病管理', time: '周一至周五 上午', available: '可预约' },
-  { id: 102, name: '王强', title: '副主任医师', department: '外科', skill: '阑尾、疝气、腹部外科', time: '周二至周六 下午', available: '有号源' },
-  { id: 103, name: '陈雪', title: '主任医师', department: '儿科', skill: '儿童呼吸道疾病、发热', time: '周一、周三、周五 上午', available: '推荐' },
-  { id: 104, name: '周楠', title: '副主任医师', department: '眼科', skill: '近视防控、白内障、眼底病', time: '周一至周四 全天', available: '可预约' }
-]
+const recommendedDoctors = ref<{ id: number; name: string; title: string; department: string; skill: string }[]>([])
+
+const loadRecommendedDoctors = async () => {
+  try {
+    const res = await doctorAPI.getList()
+    if (res.code === 200 && res.data) {
+      const titleRank: Record<string, number> = { '主任医师': 1, '副主任医师': 2, '主治医师': 3, '住院医师': 4 }
+      const sorted = [...res.data]
+        .sort((a, b) => (titleRank[a.title] || 5) - (titleRank[b.title] || 5))
+        .slice(0, 4)
+        .map(d => ({
+          id: d.doctorID,
+          name: d.doctorName,
+          title: d.title,
+          department: d.departmentName || '',
+          skill: d.specialty || ''
+        }))
+      recommendedDoctors.value = sorted
+    }
+  } catch { /* 静默 */ }
+}
 
 const appointments: AppointmentItem[] = [
   { id: 1, department: '呼吸内科', doctor: '李敏 主任医师', time: '2026-06-03 08:30', status: '待就诊', statusType: 'warning' },
@@ -241,11 +257,14 @@ const appointments: AppointmentItem[] = [
   { id: 3, department: '骨科复诊', doctor: '张立 主任医师', time: '2026-06-08 09:00', status: '待缴费', statusType: 'info' }
 ]
 
-const notices: NoticeItem[] = [
-  { title: '门诊号源已开放至下周五', desc: '请提前选择医生与时间段，避开高峰期排队。', level: 'warning' },
-  { title: '儿科夜间门诊已恢复', desc: '周一至周日 18:00 - 21:00 提供夜间诊疗。', level: 'success' },
-  { title: '体检中心预约通道升级', desc: '支持线上改期、取消和报告查询。', level: 'danger' }
-]
+const notices = ref<{ notificationID: string; title: string; notificationContent: string }[]>([])
+
+const loadNotices = async () => {
+  try {
+    const res = await notificationAPI.getLatest(5)
+    if (res.code === 200) notices.value = res.data || []
+  } catch { /* 静默失败 */ }
+}
 
 const quickServices = [
   { title: '智能预问诊', desc: 'AI 分析症状建议', icon: ChatLineRound, path: '/hospital/pre-diagnosis' },
@@ -318,7 +337,10 @@ const goToDepartment = (departmentId: number) => {
 }
 
 const goToSchedule = (doctorId: number) => {
-  router.push(`/hospital/schedule/${doctorId}`)
+  router.push({
+    path: '/hospital/appointment/doctor-detail',
+    query: { doctorId: String(doctorId) }
+  })
 }
 
 const handleQuickAction = (path: string) => {
@@ -329,6 +351,11 @@ const handleLogout = () => {
   localStorage.removeItem('hospital_user')
   router.push('/hospital/login')
 }
+
+onMounted(() => {
+  loadNotices()
+  loadRecommendedDoctors()
+})
 
 const performSearch = () => {
   const keyword = searchKeyword.value.trim()
@@ -649,7 +676,7 @@ const performSearch = () => {
 
 .content-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) 275px;
   gap: 16px;
   align-items: start;
 }

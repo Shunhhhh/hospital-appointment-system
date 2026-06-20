@@ -250,6 +250,33 @@
           </el-table-column>
         </el-table>
       </el-tab-pane>
+
+      <el-tab-pane label="通知发布" name="notification">
+        <div class="pane-toolbar">
+          <el-button type="primary" @click="openNotificationDialog()">发布通知</el-button>
+          <el-button @click="loadNotifications">刷新</el-button>
+        </div>
+
+        <el-table :data="notifications" border stripe v-loading="notificationLoading" style="width: 100%">
+          <el-table-column prop="title" label="标题" min-width="160" />
+          <el-table-column prop="notificationContent" label="内容" min-width="240" show-overflow-tooltip />
+          <el-table-column prop="notificationType" label="类型" width="100">
+            <template #default="scope">
+              {{ notificationTypeText(scope.row.notificationType) }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="sendTime" label="发布时间" width="160">
+            <template #default="scope">
+              {{ scope.row.sendTime?.slice(0, 16).replace('T', ' ') }}
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="100" fixed="right">
+            <template #default="scope">
+              <el-button text type="danger" size="small" @click="removeNotification(scope.row.notificationID)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
     </el-tabs>
 
     <el-dialog v-model="feedbackReplyVisible" title="回复反馈" width="600px" :close-on-click-modal="false">
@@ -362,6 +389,27 @@
         <el-button type="primary" @click="saveSchedule">保存</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="notificationDialogVisible" title="发布通知" width="560px">
+      <el-form :model="notificationForm" label-width="80px">
+        <el-form-item label="类型">
+          <el-select v-model="notificationForm.notificationType" style="width: 100%">
+            <el-option label="系统通知" :value="6" />
+            <el-option label="就诊提醒" :value="2" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="标题">
+          <el-input v-model="notificationForm.title" placeholder="请输入通知标题" />
+        </el-form-item>
+        <el-form-item label="内容">
+          <el-input v-model="notificationForm.notificationContent" type="textarea" :rows="5" placeholder="请输入通知内容" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="notificationDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="publishNotification" :loading="notificationSaving">发布</el-button>
+      </template>
+    </el-dialog>
 </template>
 
 <script setup lang="ts">
@@ -378,6 +426,8 @@ import type { Department } from '@/api/hospital/department'
 import type { Doctor } from '@/api/hospital/doctor'
 import type { DoctorSchedule } from '@/api/hospital/schedule'
 import type { Appointment } from '@/api/hospital/appointment'
+import { notificationAPI } from '@/api/hospital/notification'
+import type { Notification } from '@/api/hospital/notification'
 
 interface FeedbackRecord {
   feedbackID: string
@@ -435,6 +485,11 @@ const feedbackReplyForm = reactive({
 const scheduleSearch = ref('')
 const scheduleDateFilter = ref('')
 const scheduleCurrentPage = ref(1)
+const notificationDialogVisible = ref(false)
+const notificationLoading = ref(false)
+const notificationSaving = ref(false)
+const notifications = ref<Notification[]>([])
+const notificationForm = reactive<Partial<Notification>>({ notificationType: 6 })
 const schedulePageSize = ref(10)
 
 const departmentLoading = ref(false)
@@ -800,6 +855,52 @@ const appointmentTagType = (status?: number) => {
   return 'info'
 }
 
+const notificationTypeText = (type: number) => {
+  return ({ 1: '预约成功', 2: '就诊提醒', 3: '候补成功', 4: '退号通知', 5: '医生回复', 6: '系统通知' } as Record<number, string>)[type] || '未知'
+}
+
+const loadNotifications = async () => {
+  notificationLoading.value = true
+  try {
+    const res = await notificationAPI.getAll()
+    notifications.value = res.code === 200 ? (res.data || []) : []
+  } catch { ElMessage.error('加载通知失败') }
+  finally { notificationLoading.value = false }
+}
+
+const openNotificationDialog = () => {
+  notificationForm.title = ''
+  notificationForm.notificationContent = ''
+  notificationForm.notificationType = 6
+  notificationDialogVisible.value = true
+}
+
+const publishNotification = async () => {
+  if (!notificationForm.title?.trim() || !notificationForm.notificationContent?.trim()) {
+    ElMessage.warning('标题和内容不能为空')
+    return
+  }
+  notificationSaving.value = true
+  try {
+    const res = await notificationAPI.publish(notificationForm)
+    if (res.code === 200) {
+      ElMessage.success('通知已发布')
+      notificationDialogVisible.value = false
+      await loadNotifications()
+    } else {
+      ElMessage.error(res.message || '发布失败')
+    }
+  } catch { ElMessage.error('发布失败') }
+  finally { notificationSaving.value = false }
+}
+
+const removeNotification = async (id: string) => {
+  await ElMessageBox.confirm('确认删除该通知？', '提示')
+  await notificationAPI.delete(id)
+  ElMessage.success('已删除')
+  await loadNotifications()
+}
+
 const handleLogout = async () => {
   localStorage.removeItem('hospital_user')
   ElMessage.success('已退出登录')
@@ -812,6 +913,7 @@ watch(activeTab, (value) => {
   if (value === 'schedule' && schedules.value.length === 0) loadSchedules()
   if (value === 'appointment' && appointments.value.length === 0) loadAppointments()
   if (value === 'feedback' && feedbacks.value.length === 0) loadFeedbacks()
+  if (value === 'notification' && notifications.value.length === 0) loadNotifications()
 })
 
 onMounted(async () => {

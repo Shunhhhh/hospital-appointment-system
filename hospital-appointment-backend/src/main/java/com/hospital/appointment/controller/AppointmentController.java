@@ -95,11 +95,13 @@ public class AppointmentController {
      */
     @PutMapping("/{id}/checkin")
     public Result<String> checkIn(@PathVariable String id) {
-        boolean success = appointmentService.checkIn(id);
-        if (success) {
-            return Result.success("签到成功");
+        try {
+            boolean success = appointmentService.checkIn(id);
+            if (success) return Result.success("签到成功");
+            return Result.error("签到失败");
+        } catch (IllegalArgumentException e) {
+            return Result.error(e.getMessage());
         }
-        return Result.error("签到失败");
     }
     
     /**

@@ -174,6 +174,10 @@ public class AppointmentService {
         if (appointment == null) {
             return false;
         }
+        // 仅当天预约才能签到
+        if (!appointment.getAppointmentDate().isEqual(LocalDate.now())) {
+            throw new IllegalArgumentException("仅当天就诊可以签到");
+        }
         // 检查是否已超时（上午时段12:00后、下午时段18:00后不可签到）
         if (appointment.getAppointmentDate().equals(LocalDate.now())) {
             LocalTime now = LocalTime.now();

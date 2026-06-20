@@ -174,7 +174,7 @@ public class ScheduleController {
         if (success) {
             return Result.success("号源预约成功");
         }
-        return Result.success("号源预约失败");
+        return Result.error("号源预约失败");
     }
     
     /**

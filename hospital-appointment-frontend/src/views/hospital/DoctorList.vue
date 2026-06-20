@@ -260,25 +260,14 @@
                   </div>
                 </div>
               </div>
-
-              <div class="online-banner card-base">
-                <div>
-                  <div class="online-title">医生在线问诊</div>
-                  <div class="online-desc">图文问诊，快速获取专业建议</div>
-                </div>
-                <el-button type="success" plain class="consult-action">立即问诊</el-button>
-              </div>
             </div>
 
             <div class="source-card card-base">
               <div class="source-head">
                 <div>
                   <h3>号源预约</h3>
-                  <p>选择院区与时段完成挂号</p>
+                  <p>选择时段完成挂号</p>
                 </div>
-                <el-tabs class="campus-tabs">
-                  <el-tab-pane label="门诊号源" name="默认" />
-                </el-tabs>
               </div>
 
               <div v-if="visibleSchedules.length" class="source-list">
@@ -352,7 +341,6 @@ type Department = {
 type DoctorItem = {
   id: number
   subDepartmentId: string
-  campus: '外滩院区' | '月湖院区'
   name: string
   avatar: string
   title: string
@@ -367,7 +355,6 @@ type DoctorItem = {
 type ScheduleItem = {
   id: number
   doctorId: number
-  campus: '外滩院区' | '月湖院区'
   dateKey: string
   displayDate: string
   period: '上午' | '下午'
@@ -389,8 +376,6 @@ const topMenus = [
   { label: '个人中心', path: '/hospital/profile' }
 ]
 
-const campuses = ['外滩院区', '月湖院区'] as const
-const selectedCampus = ref<(typeof campuses)[number]>('外滩院区')
 const weekdayLabels = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 
 const toDateKey = (date: Date) => {
@@ -464,7 +449,6 @@ const doctors = reactive<DoctorItem[]>([
   {
     id: 101,
     subDepartmentId: 'cardio-general',
-    campus: '外滩院区',
     name: '王世奇',
     avatar: '',
     title: '主任医师',
@@ -479,7 +463,6 @@ const doctors = reactive<DoctorItem[]>([
   {
     id: 102,
     subDepartmentId: 'cardio-general',
-    campus: '外滩院区',
     name: '林若舟',
     avatar: '',
     title: '副主任医师',
@@ -493,7 +476,6 @@ const doctors = reactive<DoctorItem[]>([
   {
     id: 103,
     subDepartmentId: 'cardio-general',
-    campus: '外滩院区',
     name: '沈越',
     avatar: '',
     title: '主治医师',
@@ -507,7 +489,6 @@ const doctors = reactive<DoctorItem[]>([
   {
     id: 104,
     subDepartmentId: 'cardio-general',
-    campus: '外滩院区',
     name: '周铭',
     avatar: '',
     title: '主任医师',
@@ -521,7 +502,6 @@ const doctors = reactive<DoctorItem[]>([
   {
     id: 201,
     subDepartmentId: 'neuro-general',
-    campus: '外滩院区',
     name: '艾园园',
     avatar: '',
     title: '主治医师',
@@ -535,7 +515,6 @@ const doctors = reactive<DoctorItem[]>([
   {
     id: 202,
     subDepartmentId: 'eye-general',
-    campus: '外滩院区',
     name: '包亮',
     avatar: '',
     title: '住院医师',
@@ -549,7 +528,6 @@ const doctors = reactive<DoctorItem[]>([
   {
     id: 203,
     subDepartmentId: 'endo-general',
-    campus: '月湖院区',
     name: '包俊炜',
     avatar: '',
     title: '主治医师',
@@ -563,7 +541,6 @@ const doctors = reactive<DoctorItem[]>([
   {
     id: 204,
     subDepartmentId: 'kidney-general',
-    campus: '外滩院区',
     name: '包斯增',
     avatar: '',
     title: '主治医师',
@@ -577,7 +554,6 @@ const doctors = reactive<DoctorItem[]>([
   {
     id: 205,
     subDepartmentId: 'ent-general',
-    campus: '月湖院区',
     name: '包卫亮',
     avatar: '',
     title: '主任医师',
@@ -591,7 +567,6 @@ const doctors = reactive<DoctorItem[]>([
   {
     id: 206,
     subDepartmentId: 'pharmacy-general',
-    campus: '外滩院区',
     name: '陈知行',
     avatar: '',
     title: '主任药师',
@@ -608,7 +583,6 @@ const schedules = reactive<ScheduleItem[]>([
   {
     id: 1,
     doctorId: 101,
-    campus: '外滩院区',
     dateKey: '2026-06-02',
     displayDate: '06月02日 周二',
     period: '上午',
@@ -621,7 +595,6 @@ const schedules = reactive<ScheduleItem[]>([
   {
     id: 2,
     doctorId: 101,
-    campus: '外滩院区',
     dateKey: '2026-06-02',
     displayDate: '06月02日 周二',
     period: '下午',
@@ -634,7 +607,6 @@ const schedules = reactive<ScheduleItem[]>([
   {
     id: 3,
     doctorId: 101,
-    campus: '外滩院区',
     dateKey: '2026-06-03',
     displayDate: '06月03日 周三',
     period: '上午',
@@ -647,7 +619,6 @@ const schedules = reactive<ScheduleItem[]>([
   {
     id: 4,
     doctorId: 101,
-    campus: '月湖院区',
     dateKey: '2026-06-04',
     displayDate: '06月04日 周四',
     period: '上午',
@@ -660,7 +631,6 @@ const schedules = reactive<ScheduleItem[]>([
   {
     id: 5,
     doctorId: 102,
-    campus: '外滩院区',
     dateKey: '2026-06-02',
     displayDate: '06月02日 周二',
     period: '上午',
@@ -726,10 +696,6 @@ const getCurrentPatientId = () => {
   }
 }
 
-const getCampusByLocation = (location?: string) => {
-  return location?.includes('月湖') ? '月湖院区' : '外滩院区'
-}
-
 const formatScheduleDate = (dateText: string) => {
   const date = new Date(`${dateText}T00:00:00`)
   if (Number.isNaN(date.getTime())) return dateText
@@ -753,8 +719,11 @@ const mapRegistrationType = (type: number) => {
 const resolveDoctorBookingStatus = (doctorId: number): DoctorItem['bookingStatus'] => {
   const doctorSchedules = schedules.filter(item => item.doctorId === doctorId && item.remaining > 0)
   if (doctorSchedules.length === 0) return 'full'
-  if (doctorSchedules.some(item => item.period === '上午')) return 'am'
-  if (doctorSchedules.some(item => item.period === '下午')) return 'pm'
+  const hasAM = doctorSchedules.some(item => item.period === '上午')
+  const hasPM = doctorSchedules.some(item => item.period === '下午')
+  if (hasAM && hasPM) return 'available'
+  if (hasAM) return 'am'
+  if (hasPM) return 'pm'
   return 'available'
 }
 
@@ -786,10 +755,6 @@ const loadBackendAppointmentData = async () => {
     loadedAnyBackendData = true
   }
 
-  const departmentCampus = new Map(
-    (departmentRes?.data || []).map(item => [item.departmentID, getCampusByLocation(item.departmentLocation)])
-  )
-
   if (scheduleRes?.code === 200 && scheduleRes.data?.length) {
     const endDateKey = getDateKeyAfter(13)
     const mappedSchedules = scheduleRes.data
@@ -797,7 +762,6 @@ const loadBackendAppointmentData = async () => {
       .map(item => ({
         id: item.scheduleID,
         doctorId: item.doctorID,
-        campus: departmentCampus.get(item.departmentID || 0) || '外滩院区',
         dateKey: item.scheduleDate,
         displayDate: formatScheduleDate(item.scheduleDate),
         period: item.timeSlot === 2 ? '下午' as const : '上午' as const,
@@ -817,7 +781,6 @@ const loadBackendAppointmentData = async () => {
       .map(item => ({
         id: item.doctorID,
         subDepartmentId: String(item.departmentID),
-        campus: departmentCampus.get(item.departmentID) || '外滩院区',
         name: item.doctorName,
         avatar: item.doctorPhoto || '',
         title: item.title,
@@ -949,9 +912,6 @@ const syncStateWithRoute = () => {
   const primaryFromRoute = resolveDepartmentRouteId(typeof q.primary === 'string' ? q.primary : routeDepartmentId)
   const subFromRoute = resolveDepartmentRouteId(typeof q.sub === 'string' ? q.sub : routeDepartmentId)
 
-  if (typeof q.campus === 'string' && campuses.includes(q.campus as (typeof campuses)[number])) {
-    selectedCampus.value = q.campus as (typeof campuses)[number]
-  }
   if (typeof q.date === 'string') {
     const validDateKeys = dateOptions.value.map(item => item.key)
     selectedDateKey.value = validDateKeys.includes(q.date) ? q.date : todayDateKey
@@ -1031,7 +991,6 @@ const openDoctorList = (sub: SubDepartment) => {
   router.push({
     path: '/hospital/appointment/doctors',
     query: {
-      campus: selectedCampus.value,
       date: selectedDateKey.value,
       primary: selectedPrimaryDepartmentId.value,
       sub: sub.id
@@ -1044,7 +1003,6 @@ const openDoctorDetail = (doctor: DoctorItem) => {
   router.push({
     path: '/hospital/appointment/doctor-detail',
     query: {
-      campus: selectedCampus.value,
       date: selectedDateKey.value,
       primary: selectedPrimaryDepartmentId.value,
       sub: selectedSubDepartmentId.value,
@@ -1057,7 +1015,6 @@ const goDepartmentStep = () => {
   router.push({
     path: '/hospital/appointment/departments',
     query: {
-      campus: selectedCampus.value,
       date: selectedDateKey.value,
       primary: selectedPrimaryDepartmentId.value,
       sub: selectedSubDepartmentId.value
@@ -1069,7 +1026,6 @@ const goDoctorListStep = () => {
   router.push({
     path: '/hospital/appointment/doctors',
     query: {
-      campus: selectedCampus.value,
       date: selectedDateKey.value,
       primary: selectedPrimaryDepartmentId.value,
       sub: selectedSubDepartmentId.value
@@ -1107,7 +1063,6 @@ const handleBooking = async (schedule: ScheduleItem) => {
       [
         `医生：${doctor.name}`,
         `科室：${doctor.department}`,
-        `院区：${schedule.campus}`,
         `日期：${schedule.displayDate}`,
         `时间段：${schedule.period}`,
         `挂号费：${schedule.fee.toFixed(2)}元`

@@ -81,12 +81,11 @@
           <div class="card-actions">
             <template v-if="apt.appointmentStatus === 1 && !isCheckInExpired(apt)">
               <el-button size="small" @click="handleCancel(apt.appointmentID)">取消预约</el-button>
-              <el-button type="primary" size="small" @click="handleCheckIn(apt.appointmentID)">签到</el-button>
+              <el-button type="primary" size="small" :disabled="!isToday(apt)" @click="handleCheckIn(apt.appointmentID)">签到</el-button>
             </template>
 
             <template v-else-if="apt.appointmentStatus === 1 && isCheckInExpired(apt)">
               <el-button type="warning" size="small" disabled>签到已截止</el-button>
-              <span class="waiting-hint danger">超过预约开始 5 分钟未签到</span>
             </template>
 
             <template v-else-if="apt.appointmentStatus === 2">
@@ -202,6 +201,10 @@ const getCurrentPatientId = () => {
   } catch {
     return null
   }
+}
+
+const isToday = (apt: Appointment) => {
+  return apt.appointmentDate === new Date().toISOString().split('T')[0]
 }
 
 const isCheckInExpired = (apt: Appointment) => {

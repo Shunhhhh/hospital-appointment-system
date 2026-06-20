@@ -5,6 +5,7 @@ import com.hospital.appointment.mapper.PatientMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 患者服务类
@@ -20,6 +21,7 @@ public class PatientService {
     /**
      * 患者注册
      */
+    @Transactional
     public boolean register(Patient patient) {
         // 检查手机号和身份证是否已存在
         Patient existing = patientMapper.selectByPhone(patient.getPatientPhone());
